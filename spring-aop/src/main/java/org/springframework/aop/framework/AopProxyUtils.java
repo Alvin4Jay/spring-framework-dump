@@ -127,7 +127,7 @@ public abstract class AopProxyUtils {
 				else if (Proxy.isProxyClass(targetClass)) {
 					advised.setInterfaces(targetClass.getInterfaces());
 				}
-				specifiedInterfaces = advised.getProxiedInterfaces();
+				specifiedInterfaces = advised.getProxiedInterfaces(); // 更新
 			}
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
@@ -146,6 +146,7 @@ public abstract class AopProxyUtils {
 		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
 		int index = specifiedInterfaces.length;
+		// 添加SpringProxy、Advised、DecoratingProxy接口
 		if (addSpringProxy) {
 			proxiedInterfaces[index] = SpringProxy.class;
 			index++;
@@ -189,7 +190,7 @@ public abstract class AopProxyUtils {
 	/**
 	 * Check equality of the proxies behind the given AdvisedSupport objects.
 	 * Not the same as equality of the AdvisedSupport objects:
-	 * rather, equality of interfaces, advisors and target sources.
+	 * rather, equality of interfaces, advisors and target sources. 比较接口、通知器和targetSource
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
 		return (a == b ||
@@ -224,18 +225,18 @@ public abstract class AopProxyUtils {
 		if (ObjectUtils.isEmpty(arguments)) {
 			return new Object[0];
 		}
-		if (method.isVarArgs()) {
+		if (method.isVarArgs()) { // 存在可变参数
 			Class<?>[] paramTypes = method.getParameterTypes();
 			if (paramTypes.length == arguments.length) {
-				int varargIndex = paramTypes.length - 1;
+				int varargIndex = paramTypes.length - 1; // 可变参数在最后
 				Class<?> varargType = paramTypes[varargIndex];
 				if (varargType.isArray()) {
 					Object varargArray = arguments[varargIndex];
 					if (varargArray instanceof Object[] && !varargType.isInstance(varargArray)) {
 						Object[] newArguments = new Object[arguments.length];
 						System.arraycopy(arguments, 0, newArguments, 0, varargIndex);
-						Class<?> targetElementType = varargType.getComponentType();
-						int varargLength = Array.getLength(varargArray);
+						Class<?> targetElementType = varargType.getComponentType(); // 可变参数数组的元素类型
+						int varargLength = Array.getLength(varargArray); // 长度
 						Object newVarargArray = Array.newInstance(targetElementType, varargLength);
 						System.arraycopy(varargArray, 0, newVarargArray, 0, varargLength);
 						newArguments[varargIndex] = newVarargArray;

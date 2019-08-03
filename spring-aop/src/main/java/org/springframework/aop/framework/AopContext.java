@@ -63,6 +63,7 @@ public final class AopContext {
 	 * method was invoked outside an AOP invocation context, or because the
 	 * AOP framework has not been configured to expose the proxy
 	 */
+	// 用于获取当前AOP上下文的代理对象
 	public static Object currentProxy() throws IllegalStateException {
 		Object proxy = currentProxy.get();
 		if (proxy == null) {

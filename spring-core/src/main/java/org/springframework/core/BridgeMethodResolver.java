@@ -60,16 +60,16 @@ public final class BridgeMethodResolver {
 	 * @return the original method (either the bridged method or the passed-in method
 	 * if no more specific one could be found)
 	 */
-	public static Method findBridgedMethod(Method bridgeMethod) {
+	public static Method findBridgedMethod(Method bridgeMethod) { // 返回桥接方法对应的原始方法
 		if (!bridgeMethod.isBridge()) {
-			return bridgeMethod;
+			return bridgeMethod; // 如果不是bridge方法，直接返回
 		}
 
-		// Gather all methods with matching name and parameter size.
+		// Gather all methods with matching name and parameter size. 匹配名称与参数
 		List<Method> candidateMethods = new ArrayList<>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
 		for (Method candidateMethod : methods) {
-			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) {
+			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) { // 找出所有候选的方法
 				candidateMethods.add(candidateMethod);
 			}
 		}
@@ -80,13 +80,13 @@ public final class BridgeMethodResolver {
 		}
 
 		// Search for candidate match.
-		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
+		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod); // 在候选方法中搜索
 		if (bridgedMethod != null) {
 			// Bridged method found...
 			return bridgedMethod;
 		}
 		else {
-			// A bridge method was passed in but we couldn't find the bridged method.
+			// A bridge method was passed in but we couldn't find the bridged method. 找不到被bridged的方法
 			// Let's proceed with the passed-in method and hope for the best...
 			return bridgeMethod;
 		}
@@ -99,6 +99,7 @@ public final class BridgeMethodResolver {
 	 * checks and can be used quickly filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
+		// 名称相同、参数相同，则是BridgedCandidate
 		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
@@ -235,6 +236,7 @@ public final class BridgeMethodResolver {
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
+		// 检查参数类型和返回值类型
 		return (Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
 				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()));
 	}

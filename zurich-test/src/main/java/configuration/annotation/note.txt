@@ -1,0 +1,28 @@
+@Configuration
+@ComponentScan
+public class A extends C implements E{
+
+
+	@Configurstion
+	@ComponentScan
+	public class B extends D  implements F {
+
+
+
+
+	}
+
+
+}
+
+@Configuration
+@ComponentScan
+public class C extends G{
+
+}
+
+@Configuration
+@ComponentScan
+public class D extends H{
+
+}

@@ -151,9 +151,9 @@ public abstract class AnnotationConfigUtils {
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
-				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE); // 比较器设置
 			}
-			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) { // SimpleAutowireCandidateResolver实例
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
@@ -163,12 +163,14 @@ public abstract class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
+			// 注册ConfigurationClassPostProcessor的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			// 注册AutowiredAnnotationBeanPostProcessor的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -176,6 +178,7 @@ public abstract class AnnotationConfigUtils {
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			// 注册CommonAnnotationBeanPostProcessor的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -191,18 +194,21 @@ public abstract class AnnotationConfigUtils {
 						"Cannot load optional framework class: " + PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, ex);
 			}
 			def.setSource(source);
+			// 注册PersistenceAnnotationBeanPostProcessor的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
+			// 注册EventListenerMethodProcessor的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
 
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
+			// 注册 DefaultEventListenerFactory 的BeanDefinition
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
 		}
 
@@ -230,6 +236,7 @@ public abstract class AnnotationConfigUtils {
 		}
 	}
 
+	// 解析公共的注解
 	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}
@@ -268,7 +275,7 @@ public abstract class AnnotationConfigUtils {
 			ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
 
 		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
-		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
+		if (scopedProxyMode.equals(ScopedProxyMode.NO)) { // 不用代理，返回
 			return definition;
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
@@ -297,10 +304,10 @@ public abstract class AnnotationConfigUtils {
 
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
-		// Direct annotation present?
+		// Direct annotation present? 是否存在直接注解在AnnotationMetadata对应的类上的annotationClassName
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
-		// Container annotation present?
+		// Container annotation present? 检查容器注解是否存在？？ @PropertySources ---> @PropertySource
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {

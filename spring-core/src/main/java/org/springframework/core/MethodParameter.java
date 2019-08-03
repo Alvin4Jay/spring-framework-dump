@@ -400,7 +400,7 @@ public class MethodParameter {
 	public Class<?> getParameterType() {
 		Class<?> paramType = this.parameterType;
 		if (paramType == null) {
-			if (this.parameterIndex < 0) {
+			if (this.parameterIndex < 0) { // 返回值类型
 				Method method = getMethod();
 				paramType = (method != null ? method.getReturnType() : void.class);
 			}

@@ -55,21 +55,21 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 
 	@Override
 	public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
-		if (adviceObject instanceof Advisor) {
+		if (adviceObject instanceof Advisor) { // 已经是advisor，直接返回
 			return (Advisor) adviceObject;
 		}
-		if (!(adviceObject instanceof Advice)) {
+		if (!(adviceObject instanceof Advice)) { // 不是advice类型，抛出异常
 			throw new UnknownAdviceTypeException(adviceObject);
 		}
 		Advice advice = (Advice) adviceObject;
 		if (advice instanceof MethodInterceptor) {
 			// So well-known it doesn't even need an adapter.
-			return new DefaultPointcutAdvisor(advice);
+			return new DefaultPointcutAdvisor(advice); // 对于MethodInterceptor，返回DefaultPointcutAdvisor，匹配所有类、方法
 		}
 		for (AdvisorAdapter adapter : this.adapters) {
 			// Check that it is supported.
 			if (adapter.supportsAdvice(advice)) {
-				return new DefaultPointcutAdvisor(advice);
+				return new DefaultPointcutAdvisor(advice); // 返回DefaultPointcutAdvisor，匹配所有类、方法
 			}
 		}
 		throw new UnknownAdviceTypeException(advice);
@@ -79,9 +79,13 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
 		Advice advice = advisor.getAdvice();
+		// 若advice是MethodInterceptor类型的，直接添加到interceptors中即可。
+        // 比如AspectJAfterAdvice就实现了MethodInterceptor接口
 		if (advice instanceof MethodInterceptor) {
 			interceptors.add((MethodInterceptor) advice);
 		}
+		// 对于AspectJMethodBeforeAdvice等类型的通知，由于没有实现MethodInterceptor
+        // 接口，所以这里需要通过适配器进行转换
 		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {
 				interceptors.add(adapter.getInterceptor(advisor));

@@ -39,7 +39,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	/**
 	 * Specify a prefix to use for the attribute names in the backend session.
 	 * <p>Default is to use no prefix, storing the session attributes with the
-	 * same name as in the model.
+	 * same name as in the instantiate.model.
 	 */
 	public void setAttributeNamePrefix(@Nullable String attributeNamePrefix) {
 		this.attributeNamePrefix = (attributeNamePrefix != null ? attributeNamePrefix : "");

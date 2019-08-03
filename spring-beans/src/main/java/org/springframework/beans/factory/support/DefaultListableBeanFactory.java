@@ -492,7 +492,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<>();
 
-		// Check all bean definitions.
+		// Check all bean definitions.  检查所有的beanDefinitionNames
 		for (String beanName : this.beanDefinitionNames) {
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.
@@ -545,7 +545,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		// Check manually registered singletons too.
+		// Check manually registered singletons too. 检查手动注册的单例
 		for (String beanName : this.manualSingletonNames) {
 			try {
 				// In case of FactoryBean, match object created by FactoryBean.
@@ -764,7 +764,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
+		BeanDefinition bd = this.beanDefinitionMap.get(beanName);// 从缓存中获取BeanDefinition
 		if (bd == null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No bean named '" + beanName + "' found in " + this);
@@ -810,24 +810,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
-	public void preInstantiateSingletons() throws BeansException {
+	public void preInstantiateSingletons() throws BeansException {  // 实例化所有遗留的、非懒加载的单例Bean
 		if (logger.isTraceEnabled()) {
 			logger.trace("Pre-instantiating singletons in " + this);
 		}
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
-		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
+		// 拷贝一份beanDefinitionNames，防止在一些bean初始化时可能会注册新的bean definitions，导致beanDefinitionNames变更
+		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames); // this.beanDefinitionNames 保存了所有的 beanNames
 
-		// Trigger initialization of all non-lazy singleton beans...
+		// Trigger initialization of all non-lazy singleton beans... 实例化所有非懒加载的单例Bean
 		for (String beanName : beanNames) {
-			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName); // 获取MergedLocalBeanDefinition，合并父子BeanDefinition
+			// 非抽象、单例、非懒加载的bean初始化。如果配置了 'abstract = true'，那是不需要初始化的
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-				if (isFactoryBean(beanName)) {
-					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
+				if (isFactoryBean(beanName)) { // 是否是Factory Bean
+					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName); // 实例化FactoryBean本身
 					if (bean instanceof FactoryBean) {
 						final FactoryBean<?> factory = (FactoryBean<?>) bean;
 						boolean isEagerInit;
+						// 判断当前 FactoryBean 是否是 SmartFactoryBean 的实现
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
 							isEagerInit = AccessController.doPrivileged((PrivilegedAction<Boolean>)
 											((SmartFactoryBean<?>) factory)::isEagerInit,
@@ -838,17 +841,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
 						if (isEagerInit) {
+							// 使用FactoryBean创建实例，初始化该FactoryBean对应的实例(getObject())
 							getBean(beanName);
 						}
 					}
 				}
 				else {
+					// 不是FactoryBean，直接初始化
 					getBean(beanName);
 				}
 			}
 		}
 
-		// Trigger post-initialization callback for all applicable beans...
+		// Trigger post-initialization callback for all applicable beans... 执行SmartInitializingSingleton接口回调(单例已全部初始化)
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton) {
@@ -880,6 +885,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
+				// 1.验证BeanDefinition，如方法覆盖等
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
 			catch (BeanDefinitionValidationException ex) {
@@ -889,12 +895,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		// 2.1处理重复名称的 Bean 定义的情况
 		if (existingDefinition != null) {
 			if (!isAllowBeanDefinitionOverriding()) {
+				// 如果不允许覆盖的话，抛异常
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+				// 用框架定义的 Bean definition覆盖用户自定义的 Bean definition
 				if (logger.isInfoEnabled()) {
 					logger.info("Overriding user-defined bean definition for bean '" + beanName +
 							"' with a framework-generated bean definition: replacing [" +
@@ -902,6 +911,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else if (!beanDefinition.equals(existingDefinition)) {
+				// 用新的 Bean definition 覆盖旧的 Bean definition
 				if (logger.isDebugEnabled()) {
 					logger.debug("Overriding bean definition for bean '" + beanName +
 							"' with a different definition: replacing [" + existingDefinition +
@@ -909,15 +919,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				// 用同等的 Bean definition覆盖旧的 Bean definition，这里指的是 equals 方法返回 true 的 Bean definition
 				if (logger.isTraceEnabled()) {
 					logger.trace("Overriding bean definition for bean '" + beanName +
 							"' with an equivalent definition: replacing [" + existingDefinition +
 							"] with [" + beanDefinition + "]");
 				}
 			}
-			this.beanDefinitionMap.put(beanName, beanDefinition);
+			this.beanDefinitionMap.put(beanName, beanDefinition); // 覆盖
 		}
+		// 2.2注册新的BeanDefinition
 		else {
+			// 判断是否已经有其他的 Bean 开始初始化了
+			// 注意，"注册Bean" 这个动作结束，Bean 依然还没有初始化
+			// 在 Spring 容器启动的最后，会 预初始化 所有的 singleton beans
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
@@ -934,11 +949,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				// 最正常的应该是进到这个分支。
 				// Still in startup registration phase
+
+				// 将 BeanDefinition 放到这个 map 中，这个 map 保存了所有的 BeanDefinition
 				this.beanDefinitionMap.put(beanName, beanDefinition);
+				// 这是个 ArrayList，所以会按照 bean 配置的顺序保存每一个注册的 Bean 的名字
 				this.beanDefinitionNames.add(beanName);
+				// 这是个 LinkedHashSet，代表的是手动注册的 singleton bean，
+				// 注意这里是 remove 方法，到这里的 Bean 当然不是手动注册的
+				// 手动指的是通过调用以下方法注册的 bean ：
+				//     registerSingleton(String beanName, Object singletonObject)
+				// 这不是重点，解释只是为了不让大家疑惑。Spring 会在后面"手动"注册一些 Bean，
+				// 如 "environment"、"systemProperties" 等 bean，我们自己也可以在运行时注册 Bean 到容器中
 				this.manualSingletonNames.remove(beanName);
 			}
+			// 这个不重要，在预初始化的时候会用到，不必管它
 			this.frozenBeanDefinitionNames = null;
 		}
 
@@ -1056,8 +1082,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void destroySingletons() {
-		super.destroySingletons();
-		this.manualSingletonNames.clear();
+		super.destroySingletons(); // 销毁所有单例bean
+		this.manualSingletonNames.clear(); // 清除手动注册的单例信息
 		clearByTypeCache();
 	}
 
@@ -1146,11 +1172,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
-		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (Optional.class == descriptor.getDependencyType()) {
+		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer()); // 设置ParameterNameDiscoverer
+		if (Optional.class == descriptor.getDependencyType()) { // 类型为Optional
 			return createOptionalDependency(descriptor, requestingBeanName);
 		}
-		else if (ObjectFactory.class == descriptor.getDependencyType() ||
+		else if (ObjectFactory.class == descriptor.getDependencyType() || // ObjectFactory/ObjectProvider
 				ObjectProvider.class == descriptor.getDependencyType()) {
 			return new DependencyObjectProvider(descriptor, requestingBeanName);
 		}
@@ -1173,7 +1199,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
-			Object shortcut = descriptor.resolveShortcut(this);
+			Object shortcut = descriptor.resolveShortcut(this); // 快捷方式解析
 			if (shortcut != null) {
 				return shortcut;
 			}

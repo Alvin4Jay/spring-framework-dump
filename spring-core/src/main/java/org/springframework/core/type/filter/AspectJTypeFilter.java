@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  * Type filter that uses AspectJ type pattern for matching.
  *
  * <p>A critical implementation details of this type filter is that it does not
- * load the class being examined to match with a type pattern.
+ * load the class being examined to match with a type pattern. 不需要加载类
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller

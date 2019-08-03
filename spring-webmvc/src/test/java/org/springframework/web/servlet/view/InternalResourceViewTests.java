@@ -84,7 +84,7 @@ public class InternalResourceViewTests {
 		view.render(model, request, response);
 		assertEquals(url, response.getForwardedUrl());
 
-		model.forEach((key, value) -> assertEquals("Values for model key '" + key
+		model.forEach((key, value) -> assertEquals("Values for instantiate.model key '" + key
 				+ "' must match", value, request.getAttribute(key)));
 	}
 

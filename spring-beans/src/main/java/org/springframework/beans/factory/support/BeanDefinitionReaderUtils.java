@@ -58,12 +58,14 @@ public abstract class BeanDefinitionReaderUtils {
 			@Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
-		bd.setParentName(parentName);
+		bd.setParentName(parentName); // 设置parent name
 		if (className != null) {
 			if (classLoader != null) {
+				// 设置Class对象
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
 			else {
+				// 设置BeanClassName
 				bd.setBeanClassName(className);
 			}
 		}
@@ -125,6 +127,7 @@ public abstract class BeanDefinitionReaderUtils {
 		}
 		else {
 			// Top-level bean: use plain class name with unique suffix if necessary.
+			// e.g. com.javadoop.example.MessageServiceImpl#0
 			return uniqueBeanName(generatedBeanName, registry);
 		}
 		return id;
@@ -163,12 +166,16 @@ public abstract class BeanDefinitionReaderUtils {
 
 		// Register bean definition under primary name.
 		String beanName = definitionHolder.getBeanName();
+		// 注册这个 Bean
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		// 如果还有别名的话，也要根据别名全部注册一遍，不然根据别名就会找不到 Bean 了
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String alias : aliases) {
+				// alias -> beanName 保存它们的别名信息，这个很简单，用一个 map 保存一下就可以了，
+				// 获取的时候，会先将 alias 转换为 beanName，然后再查找
 				registry.registerAlias(beanName, alias);
 			}
 		}

@@ -17,7 +17,7 @@
 package org.springframework.expression;
 
 
-// TODO Is the resolver/executor model too pervasive in this package?
+// TODO Is the resolver/executor instantiate.model too pervasive in this package?
 /**
  * Executors are built by resolvers and can be cached by the infrastructure to repeat an
  * operation quickly without going back to the resolvers. For example, the particular

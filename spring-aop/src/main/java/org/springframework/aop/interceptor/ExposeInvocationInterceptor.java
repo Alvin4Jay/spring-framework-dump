@@ -43,13 +43,14 @@ import org.springframework.core.PriorityOrdered;
 @SuppressWarnings("serial")
 public final class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
-	/** Singleton instance of this class. */
+	/** Singleton instance of this class. 单例*/
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 
 	/**
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
 	 */
+	// 创建DefaultPointcutAdvisor对象
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
 		@Override
 		public String toString() {
@@ -80,20 +81,20 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 
 
 	/**
-	 * Ensures that only the canonical instance can be created.
+	 * Ensures that only the canonical instance can be created. 私有构造方法
 	 */
 	private ExposeInvocationInterceptor() {
 	}
 
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		MethodInvocation oldInvocation = invocation.get();
-		invocation.set(mi);
+		MethodInvocation oldInvocation = invocation.get(); // 旧的方法调用
+		invocation.set(mi); // 设置新方法调用到ThreadLocal
 		try {
-			return mi.proceed();
+			return mi.proceed(); // 执行拦截器链
 		}
 		finally {
-			invocation.set(oldInvocation);
+			invocation.set(oldInvocation); // 还原旧的方法调用
 		}
 	}
 

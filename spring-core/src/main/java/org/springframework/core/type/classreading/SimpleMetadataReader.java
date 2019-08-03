@@ -46,12 +46,12 @@ final class SimpleMetadataReader implements MetadataReader {
 
 	private final AnnotationMetadata annotationMetadata;
 
-
+	// 构造时解析类文件
 	SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
 		InputStream is = new BufferedInputStream(resource.getInputStream());
 		ClassReader classReader;
 		try {
-			classReader = new ClassReader(is);
+			classReader = new ClassReader(is); // ClassReader创建
 		}
 		catch (IllegalArgumentException ex) {
 			throw new NestedIOException("ASM ClassReader failed to parse class file - " +
@@ -62,7 +62,7 @@ final class SimpleMetadataReader implements MetadataReader {
 		}
 
 		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
-		classReader.accept(visitor, ClassReader.SKIP_DEBUG);
+		classReader.accept(visitor, ClassReader.SKIP_DEBUG); // 读取类文件结构
 
 		this.annotationMetadata = visitor;
 		// (since AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor)

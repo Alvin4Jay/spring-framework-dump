@@ -48,15 +48,15 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	private static final Advice EMPTY_ADVICE = new Advice() {};
 
 
-	private final AspectJExpressionPointcut declaredPointcut;
+	private final AspectJExpressionPointcut declaredPointcut; // 切点
 
-	private final Class<?> declaringClass;
+	private final Class<?> declaringClass; // 声明类
 
-	private final String methodName;
+	private final String methodName; // advice方法
 
 	private final Class<?>[] parameterTypes;
 
-	private transient Method aspectJAdviceMethod;
+	private transient Method aspectJAdviceMethod; // advice方法
 
 	private final AspectJAdvisorFactory aspectJAdvisorFactory;
 
@@ -64,7 +64,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	private final int declarationOrder;
 
-	private final String aspectName;
+	private final String aspectName; // 切面名
 
 	private final Pointcut pointcut;
 
@@ -94,9 +94,10 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		this.declarationOrder = declarationOrder;
 		this.aspectName = aspectName;
 
-		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
+		// aspectInstanceFactory.getAspectMetadata(): BeanFactoryAspectInstanceFactory
+		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) { // 切面是否懒初始化
 			// Static part of the pointcut is a lazy type.
-			Pointcut preInstantiationPointcut = Pointcuts.union(
+			Pointcut preInstantiationPointcut = Pointcuts.union( // 切点并集
 					aspectInstanceFactory.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
 
 			// Make it dynamic: must mutate from pre-instantiation to post-instantiation state.
@@ -107,7 +108,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 			this.lazy = true;
 		}
 		else {
-			// A singleton aspect.
+			// A singleton aspect. 单例的切面
 			this.pointcut = this.declaredPointcut;
 			this.lazy = false;
 			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);

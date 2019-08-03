@@ -263,7 +263,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		this.argumentNames = new String[args.length];
 		for (int i = 0; i < args.length; i++) {
 			this.argumentNames[i] = StringUtils.trimWhitespace(args[i]);
-			if (!isVariableName(this.argumentNames[i])) {
+			if (!isVariableName(this.argumentNames[i])) { // 检查是否是变量名
 				throw new IllegalArgumentException(
 						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
 						this.argumentNames[i] + "' that is not a valid Java identifier");
@@ -271,6 +271,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 		if (this.argumentNames != null) {
 			if (this.aspectJAdviceMethod.getParameterCount() == this.argumentNames.length + 1) {
+				// 多一个参数JoinPoint、ProceedingJoinPoint、StaticPart
 				// May need to add implicit join point arg name...
 				Class<?> firstArgType = this.aspectJAdviceMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
@@ -295,11 +296,11 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	protected void setReturningNameNoCheck(String name) {
 		// name could be a variable or a type...
-		if (isVariableName(name)) {
+		if (isVariableName(name)) { // 变量
 			this.returningName = name;
 		}
 		else {
-			// assume a type
+			// assume a type 类型
 			try {
 				this.discoveredReturningType = ClassUtils.forName(name, getAspectClassLoader());
 			}
@@ -622,7 +623,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	protected Object invokeAdviceMethod(
 			@Nullable JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex)
 			throws Throwable {
-
+		// 调用通知方法，并向其传递参数
 		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
 	}
 
@@ -641,6 +642,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		try {
 			ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
 			// TODO AopUtils.invokeJoinpointUsingReflection
+			// 通过反射调用通知方法
 			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
 		}
 		catch (IllegalArgumentException ex) {

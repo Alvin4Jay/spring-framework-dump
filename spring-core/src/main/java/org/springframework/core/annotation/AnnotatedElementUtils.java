@@ -40,7 +40,7 @@ import org.springframework.util.MultiValueMap;
  * repeatable annotations on {@link AnnotatedElement AnnotatedElements}.
  *
  * <p>{@code AnnotatedElementUtils} defines the public API for Spring's
- * meta-annotation programming model with support for <em>annotation attribute
+ * meta-annotation programming instantiate.model with support for <em>annotation attribute
  * overrides</em>. If you do not need support for annotation attribute
  * overrides, consider using {@link AnnotationUtils} instead.
  *

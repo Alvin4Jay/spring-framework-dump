@@ -268,7 +268,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Class<?> targetClass) {
+	public boolean matches(Class<?> targetClass) { // 类匹配
 		PointcutExpression pointcutExpression = obtainPointcutExpression();
 		try {
 			try {

@@ -48,7 +48,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * Apply this BeanPostProcessor <i>before the target bean gets instantiated</i>.
-	 * The returned bean object may be a proxy to use instead of the target bean,
+	 * The returned bean object may be a proxy to use instead of the target bean, // 在bean实例化之前应用该方法，可以返回代理
 	 * effectively suppressing default instantiation of the target bean.
 	 * <p>If a non-null object is returned by this method, the bean creation process
 	 * will be short-circuited. The only further processing applied is the
@@ -77,7 +77,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
 	 * <p>This is the ideal callback for performing custom field injection on the given bean
-	 * instance, right before Spring's autowiring kicks in.
+	 * instance, right before Spring's autowiring kicks in. // 在bean实例化之后，但是在属性填充之前的操作
 	 * <p>The default implementation returns {@code true}.
 	 * @param bean the bean instance created, with properties not having been set yet
 	 * @param beanName the name of the bean
@@ -94,7 +94,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * Post-process the given property values before the factory applies them
-	 * to the given bean, without any need for property descriptors.
+	 * to the given bean, without any need for property descriptors. // 在属性应用到bean之前，后处理属性值
 	 * <p>Implementations should return {@code null} (the default) if they provide a custom
 	 * {@link #postProcessPropertyValues} implementation, and {@code pvs} otherwise.
 	 * In a future version of this interface (with {@link #postProcessPropertyValues} removed),
@@ -124,6 +124,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * <p>Also allows for replacing the property values to apply, typically through
 	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
 	 * adding or removing specific values.
+	 * // 在属性应用到bean之前，后处理属性值
 	 * <p>The default implementation returns the given {@code pvs} as-is.
 	 * @param pvs the property values that the factory is about to apply (never {@code null})
 	 * @param pds the relevant property descriptors for the target bean (with ignored

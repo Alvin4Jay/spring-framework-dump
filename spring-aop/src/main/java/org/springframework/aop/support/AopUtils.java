@@ -222,6 +222,7 @@ public abstract class AopUtils {
 	 */
 	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(pc, "Pointcut must not be null");
+		// 使用 ClassFilter 匹配 class
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
 		}
@@ -237,6 +238,10 @@ public abstract class AopUtils {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 
+		/*
+		 * 查找当前类及其父类（以及父类的父类等等）所实现的接口，由于接口中的方法是 public，
+		 * 所以当前类可以继承其父类，和父类的父类中所有的接口方法
+		 */
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		if (!Proxy.isProxyClass(targetClass)) {
 			classes.add(ClassUtils.getUserClass(targetClass));
@@ -248,7 +253,7 @@ public abstract class AopUtils {
 			for (Method method : methods) {
 				if (introductionAwareMethodMatcher != null ?
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
-						methodMatcher.matches(method, targetClass)) {
+						methodMatcher.matches(method, targetClass)) { // 使用 methodMatcher 匹配方法，匹配成功即可立即返回
 					return true;
 				}
 			}
@@ -281,9 +286,16 @@ public abstract class AopUtils {
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
 		if (advisor instanceof IntroductionAdvisor) {
+			/*
+			 * 从通知器中获取类型过滤器 ClassFilter，并调用 matchers 方法进行匹配。
+			 * ClassFilter 接口的实现类 AspectJExpressionPointcut 为例，该类的
+			 * 匹配工作由 AspectJ 表达式解析器负责，具体匹配细节这个就没法分析了，我
+			 * AspectJ 表达式的工作流程不是很熟
+			 */
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor) {
+			// 对于普通类型的通知器，这里继续调用重载方法进行筛选
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
@@ -307,6 +319,7 @@ public abstract class AopUtils {
 		}
 		List<Advisor> eligibleAdvisors = new ArrayList<>();
 		for (Advisor candidate : candidateAdvisors) {
+			// 筛选 IntroductionAdvisor 类型的通知器
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 			}
@@ -317,6 +330,7 @@ public abstract class AopUtils {
 				// already processed
 				continue;
 			}
+			// 筛选普通类型的通知器
 			if (canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
 			}
@@ -339,6 +353,7 @@ public abstract class AopUtils {
 
 		// Use reflection to invoke the method.
 		try {
+			// 反射调用连接点方法
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(target, args);
 		}

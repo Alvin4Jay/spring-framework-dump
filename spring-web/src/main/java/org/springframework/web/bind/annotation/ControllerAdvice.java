@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
  * {@link org.springframework.core.Ordered Ordered}, and applied in that order
  * at runtime. For handling exceptions, an {@code @ExceptionHandler} will be
  * picked on the first advice with a matching exception handler method. For
- * model attributes and {@code InitBinder} initialization, {@code @ModelAttribute}
+ * instantiate.model attributes and {@code InitBinder} initialization, {@code @ModelAttribute}
  * and {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
  *
  * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be

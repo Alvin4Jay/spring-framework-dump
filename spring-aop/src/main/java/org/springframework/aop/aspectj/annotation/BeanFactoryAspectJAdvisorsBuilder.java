@@ -101,12 +101,13 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
-						if (this.advisorFactory.isAspect(beanType)) {
+						if (this.advisorFactory.isAspect(beanType)) { // 检测 beanType 是否包含 Aspect 注解
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
-							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) { // SINGLETON
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								// 获取通知器
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
 									this.advisorsCache.put(beanName, classAdvisors);
@@ -120,7 +121,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 								// Per target or per this.
 								if (this.beanFactory.isSingleton(beanName)) {
 									throw new IllegalArgumentException("Bean with name '" + beanName +
-											"' is a singleton, but aspect instantiation model is not singleton");
+											"' is a singleton, but aspect instantiation instantiate.model is not singleton");
 								}
 								MetadataAwareAspectInstanceFactory factory =
 										new PrototypeAspectInstanceFactory(this.beanFactory, beanName);

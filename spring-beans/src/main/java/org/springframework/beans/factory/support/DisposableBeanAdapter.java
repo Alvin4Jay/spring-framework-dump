@@ -374,12 +374,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 
 	/**
-	 * Check whether the given bean has any kind of destroy method to call.
+	 * Check whether the given bean has any kind of destroy method to call.判断是否有销毁方法
 	 * @param bean the bean instance
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
+		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) { // 实现DisposableBean或AutoCloseable接口，返回true
 			return true;
 		}
 		String destroyMethodName = beanDefinition.getDestroyMethodName();

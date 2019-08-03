@@ -102,9 +102,11 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @param proxyFactory the ProxyFactory for the bean
 	 */
 	protected void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+		// 获取beanClass及其父类实现的所有接口
 		Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
 		boolean hasReasonableProxyInterface = false;
 		for (Class<?> ifc : targetInterfaces) {
+			// 判断是否存在合理的代理接口(去除容器回调接口、内部语言接口)
 			if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) &&
 					ifc.getMethods().length > 0) {
 				hasReasonableProxyInterface = true;
@@ -114,11 +116,11 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 		if (hasReasonableProxyInterface) {
 			// Must allow for introductions; can't just set interfaces to the target's interfaces only.
 			for (Class<?> ifc : targetInterfaces) {
-				proxyFactory.addInterface(ifc);
+				proxyFactory.addInterface(ifc); // 添加代理接口
 			}
 		}
 		else {
-			proxyFactory.setProxyTargetClass(true);
+			proxyFactory.setProxyTargetClass(true); // 代理类
 		}
 	}
 
@@ -130,6 +132,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @param ifc the interface to check
 	 * @return whether the given interface is just a container callback
 	 */
+	// 判断是否是容器回调接口
 	protected boolean isConfigurationCallbackInterface(Class<?> ifc) {
 		return (InitializingBean.class == ifc || DisposableBean.class == ifc || Closeable.class == ifc ||
 				AutoCloseable.class == ifc || ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
@@ -143,6 +146,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @param ifc the interface to check
 	 * @return whether the given interface is an internal language interface
 	 */
+	// 判断是否是内部语言接口
 	protected boolean isInternalLanguageInterface(Class<?> ifc) {
 		return (ifc.getName().equals("groovy.lang.GroovyObject") ||
 				ifc.getName().endsWith(".cglib.proxy.Factory") ||

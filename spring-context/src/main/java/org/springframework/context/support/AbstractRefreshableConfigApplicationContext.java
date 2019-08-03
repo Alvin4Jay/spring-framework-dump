@@ -115,13 +115,14 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	}
 
 	/**
-	 * Resolve the given path, replacing placeholders with corresponding
+	 * Resolve the given path, replacing placeholders with corresponding ---> 解析path，解析其中的占位符。
 	 * environment property values if necessary. Applied to config locations.
 	 * @param path the original file path
 	 * @return the resolved file path
 	 * @see org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
 	 */
 	protected String resolvePath(String path) {
+		// 解析path和其中的占位符，解析不了抛出IllegalArgumentException异常
 		return getEnvironment().resolveRequiredPlaceholders(path);
 	}
 

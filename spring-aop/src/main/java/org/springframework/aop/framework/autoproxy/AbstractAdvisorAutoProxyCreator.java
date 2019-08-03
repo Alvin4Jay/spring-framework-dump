@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	@Nullable
-	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
+	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper; // 从BeanFactory获取实现了Advisor接口的实现类
 
 
 	@Override
@@ -91,11 +91,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
-		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		List<Advisor> candidateAdvisors = findCandidateAdvisors(); // 查找所有的通知器
+		// 筛选可应用在 beanClass 上的 Advisor，通过 ClassFilter 和 MethodMatcher
+     	// 对目标类和方法进行匹配
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
-		extendAdvisors(eligibleAdvisors);
+		extendAdvisors(eligibleAdvisors); // 扩展操作
 		if (!eligibleAdvisors.isEmpty()) {
-			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
+			eligibleAdvisors = sortAdvisors(eligibleAdvisors); // 排序
 		}
 		return eligibleAdvisors;
 	}
@@ -123,6 +125,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			// 调用重载方法
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		}
 		finally {
@@ -136,7 +139,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @param beanName the name of the Advisor bean
 	 * @return whether the bean is eligible
 	 */
-	protected boolean isEligibleAdvisorBean(String beanName) {
+	protected boolean isEligibleAdvisorBean(String beanName) { // 过滤Advisor
 		return true;
 	}
 
@@ -167,7 +170,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * This auto-proxy creator always returns pre-filtered Advisors.
+	 * This auto-proxy creator always returns pre-filtered Advisors. 总是返回预过滤的通知器
 	 */
 	@Override
 	protected boolean advisorsPreFiltered() {

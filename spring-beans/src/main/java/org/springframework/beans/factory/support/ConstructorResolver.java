@@ -168,6 +168,7 @@ class ConstructorResolver {
 						mbd.constructorArgumentsResolved = true;
 						mbd.resolvedConstructorArguments = EMPTY_ARGS;
 					}
+					// 实例化(反射)
 					bw.setBeanInstance(instantiate(beanName, mbd, uniqueCandidate, EMPTY_ARGS));
 					return bw;
 				}
@@ -377,19 +378,19 @@ class ConstructorResolver {
 			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
-		this.beanFactory.initBeanWrapper(bw);
+		this.beanFactory.initBeanWrapper(bw); // 注册属性编辑器
 
-		Object factoryBean;
-		Class<?> factoryClass;
-		boolean isStatic;
+		Object factoryBean; // 工厂bean
+		Class<?> factoryClass; // 工厂类
+		boolean isStatic; // 是否是静态工厂
 
 		String factoryBeanName = mbd.getFactoryBeanName();
-		if (factoryBeanName != null) {
+		if (factoryBeanName != null) { // factoryBeanName不为null，表示是实例工厂方法实例化bean
 			if (factoryBeanName.equals(beanName)) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"factory-bean reference points back to the same bean definition");
 			}
-			factoryBean = this.beanFactory.getBean(factoryBeanName);
+			factoryBean = this.beanFactory.getBean(factoryBeanName); // 获取factory bean
 			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
 				throw new ImplicitlyAppearedSingletonException();
 			}
@@ -453,6 +454,7 @@ class ConstructorResolver {
 						mbd.constructorArgumentsResolved = true;
 						mbd.resolvedConstructorArguments = EMPTY_ARGS;
 					}
+					// 实例化(反射)
 					bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, uniqueCandidate, EMPTY_ARGS));
 					return bw;
 				}
@@ -619,6 +621,7 @@ class ConstructorResolver {
 						this.beanFactory.getAccessControlContext());
 			}
 			else {
+				// 利用工厂方法获取实例
 				return this.beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
 			}

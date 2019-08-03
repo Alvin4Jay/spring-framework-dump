@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="user" class="instantiate.defaultconstruct.User" >
+<!--        <meta key="name" value="xuanjian"/>-->
+        <!--<lookup-method name="" bean=""/>-->
+        <!--<replaced-method name="" replacer="">
+            <arg-type match=""/>
+        </replaced-method>-->
+        <!--<constructor-arg name="">
+            <value type="int">1</value>
+            <ref />
+            <list/>
+            <bean class=""/>
+            <array value-type="" merge=""/>
+            <list />
+        </constructor-arg>-->
+        <!--<qualifier type="com.imooc.demo.controller.UserController" value="aaa">
+            <attribute key="aaa" value="bbb"/>
+        </qualifier>-->
+		<property name="name" value="xuan"/>
+		<property name="id" value="1"/>
+	</bean>
+
+	<bean id="address" class="instantiate.defaultconstruct.Address"/>
+
+	<context:component-scan base-package="instantiate.defaultconstruct">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+	</context:component-scan>
+
+    <aop:aspectj-autoproxy/>
+
+	<context:annotation-config/>
+
+    <!--<import resource="sss"/>
+
+    <alias name="user" alias="aaa"/>
+
+    <beans>
+        <bean class="com.imooc.demo.repository.UserRepository"/>
+    </beans>
+
+    <aop:aspectj-autoproxy/>
+
+    <context:property-placeholder location="application.properties"/>-->
+
+</beans>

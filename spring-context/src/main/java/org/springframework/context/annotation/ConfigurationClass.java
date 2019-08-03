@@ -56,16 +56,22 @@ final class ConfigurationClass {
 	@Nullable
 	private String beanName;
 
+	/** 导入来源，即由谁导入 */
 	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
 
 	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
 
+	/** 资源Resource与BeanDefinitionReader的对应关系 */
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
 
+	/**
+	 * {@code Map<ImportBeanDefinitionRegistrar, @Import注解(基本类上)导入该ImportBeanDefinitionRegistrar类的基本类注解元数据>}
+	 * */
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
 
+	/** 跳过处理的@Bean方法 */
 	final Set<String> skippedBeanMethods = new HashSet<>();
 
 
@@ -85,7 +91,7 @@ final class ConfigurationClass {
 	/**
 	 * Create a new {@link ConfigurationClass} representing a class that was imported
 	 * using the {@link Import} annotation or automatically processed as a nested
-	 * configuration class (if importedBy is not {@code null}).
+	 * configuration class (嵌套的内部配置类自动处理) (if importedBy is not {@code null}).
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
@@ -93,7 +99,7 @@ final class ConfigurationClass {
 	public ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
-		this.importedBy.add(importedBy);
+		this.importedBy.add(importedBy); // 由谁导入
 	}
 
 	/**
@@ -112,7 +118,7 @@ final class ConfigurationClass {
 	/**
 	 * Create a new {@link ConfigurationClass} representing a class that was imported
 	 * using the {@link Import} annotation or automatically processed as a nested
-	 * configuration class (if imported is {@code true}).
+	 * configuration class(嵌套的内部配置类自动处理) (if imported is {@code true}).
 	 * @param clazz the underlying {@link Class} to represent
 	 * @param importedBy the configuration class importing this one (or {@code null})
 	 * @since 3.1.1
@@ -120,7 +126,7 @@ final class ConfigurationClass {
 	public ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.getName());
-		this.importedBy.add(importedBy);
+		this.importedBy.add(importedBy); // 由谁导入
 	}
 
 	/**
@@ -211,9 +217,9 @@ final class ConfigurationClass {
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		// A configuration class may not be final (CGLIB limitation)
+		// A configuration class may not be final (CGLIB limitation) // CGLib限制
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
-			if (getMetadata().isFinal()) {
+			if (getMetadata().isFinal()) { // 配置类不能使final的
 				problemReporter.error(new FinalConfigurationProblem());
 			}
 		}

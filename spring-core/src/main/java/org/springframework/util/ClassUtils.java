@@ -572,11 +572,11 @@ public abstract class ClassUtils {
 	/**
 	 * Convert a "."-based fully qualified class name to a "/"-based resource path.
 	 * @param className the fully qualified class name
-	 * @return the corresponding resource path, pointing to the class
+	 * @return the corresponding resource path, pointing to the class 转换为资源路径
 	 */
 	public static String convertClassNameToResourcePath(String className) {
 		Assert.notNull(className, "Class name must not be null");
-		return className.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
+		return className.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR); // 将'.'替换为'/'
 	}
 
 	/**

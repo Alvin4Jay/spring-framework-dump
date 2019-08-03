@@ -78,6 +78,7 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
+	// 属性或方法注入
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
@@ -87,6 +88,7 @@ public class InjectionMetadata {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
+				// AutowiredFieldElement/AutowiredMethodElement注入
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -102,7 +104,7 @@ public class InjectionMetadata {
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
-				element.clearPropertySkipping(pvs);
+				element.clearPropertySkipping(pvs); // 清除属性跳过，需要处理
 			}
 		}
 	}
@@ -199,7 +201,7 @@ public class InjectionMetadata {
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
 		 */
-		protected boolean checkPropertySkipping(@Nullable PropertyValues pvs) {
+		protected boolean checkPropertySkipping(@Nullable PropertyValues pvs) {  // 根据显式配置的属性pvs，检查是否跳过方法注入
 			Boolean skip = this.skip;
 			if (skip != null) {
 				return skip;
@@ -214,12 +216,13 @@ public class InjectionMetadata {
 					return skip;
 				}
 				if (this.pd != null) {
-					if (pvs.contains(this.pd.getName())) {
+					if (pvs.contains(this.pd.getName())) { // 显式配置的值，可以跳过注入
 						// Explicit value provided as part of the bean definition.
 						this.skip = true;
 						return true;
 					}
 					else if (pvs instanceof MutablePropertyValues) {
+						// 标记已处理
 						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
 					}
 				}
@@ -229,7 +232,7 @@ public class InjectionMetadata {
 		}
 
 		/**
-		 * Clear property skipping for this element.
+		 * Clear property skipping for this element. 需要处理
 		 * @since 3.2.13
 		 */
 		protected void clearPropertySkipping(@Nullable PropertyValues pvs) {
@@ -238,6 +241,7 @@ public class InjectionMetadata {
 			}
 			synchronized (pvs) {
 				if (Boolean.FALSE.equals(this.skip) && this.pd != null && pvs instanceof MutablePropertyValues) {
+					// 已处理的属性清除掉
 					((MutablePropertyValues) pvs).clearProcessedProperty(this.pd.getName());
 				}
 			}

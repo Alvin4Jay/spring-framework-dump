@@ -58,7 +58,7 @@ public interface SingletonBeanRegistry {
 	void registerSingleton(String beanName, Object singletonObject);
 
 	/**
-	 * Return the (raw) singleton object registered under the given name.
+	 * Return the (raw) singleton object registered under the given name. (查找已经实例化的单例)
 	 * <p>Only checks already instantiated singletons; does not return an Object
 	 * for singleton bean definitions which have not been instantiated yet.
 	 * <p>The main purpose of this method is to access manually registered singletons
@@ -74,6 +74,7 @@ public interface SingletonBeanRegistry {
 	Object getSingleton(String beanName);
 
 	/**
+	 * 检查已经实例化的单例，不检查未实例化的bean definition
 	 * Check if this registry contains a singleton instance with the given name.
 	 * <p>Only checks already instantiated singletons; does not return {@code true}
 	 * for singleton bean definitions which have not been instantiated yet.

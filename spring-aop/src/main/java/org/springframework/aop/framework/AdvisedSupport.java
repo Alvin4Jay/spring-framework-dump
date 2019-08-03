@@ -80,7 +80,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** The AdvisorChainFactory to use. */
 	AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
 
-	/** Cache with Method as key and advisor chain List as value. */
+	/** Cache with Method as key and advisor chain List as value. 缓存方法与通知器链的映射 */
 	private transient Map<MethodCacheKey, List<Object>> methodCache;
 
 	/**
@@ -211,7 +211,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		if (!this.interfaces.contains(intf)) {
 			this.interfaces.add(intf);
-			adviceChanged();
+			adviceChanged(); // 事件回调
 		}
 	}
 
@@ -329,19 +329,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param advisors the advisors to register
 	 */
 	public void addAdvisors(Collection<Advisor> advisors) {
-		if (isFrozen()) {
+		if (isFrozen()) { // 如果无法再修改配置，抛出异常
 			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
 		}
 		if (!CollectionUtils.isEmpty(advisors)) {
 			for (Advisor advisor : advisors) {
 				if (advisor instanceof IntroductionAdvisor) {
+					// 校验IntroductionAdvisor
 					validateIntroductionAdvisor((IntroductionAdvisor) advisor);
 				}
 				Assert.notNull(advisor, "Advisor must not be null");
 				this.advisors.add(advisor);
 			}
-			updateAdvisorArray();
-			adviceChanged();
+			updateAdvisorArray(); // 更新数组
+			adviceChanged(); // 事件通知
 		}
 	}
 
@@ -478,11 +479,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
-		List<Object> cached = this.methodCache.get(cacheKey);
-		if (cached == null) {
+		List<Object> cached = this.methodCache.get(cacheKey); // 从缓存中获取
+		if (cached == null) {  // 缓存未命中，则进行下一步处理
+			// 获取所有的拦截器
 			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
 					this, method, targetClass);
-			this.methodCache.put(cacheKey, cached);
+			this.methodCache.put(cacheKey, cached); // 存入缓存
 		}
 		return cached;
 	}

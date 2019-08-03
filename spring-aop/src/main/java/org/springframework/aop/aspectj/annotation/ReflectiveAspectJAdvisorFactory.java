@@ -112,17 +112,19 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	@Override
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
+		// 获取 aspectClass 和 aspectName
 		Class<?> aspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();
 		String aspectName = aspectInstanceFactory.getAspectMetadata().getAspectName();
-		validate(aspectClass);
+		validate(aspectClass); // 校验切面类
 
 		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
-		// so that it will only instantiate once.
+		// so that it will only instantiate once. 只会实例化切面对象一次
 		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
 		List<Advisor> advisors = new ArrayList<>();
-		for (Method method : getAdvisorMethods(aspectClass)) {
+		for (Method method : getAdvisorMethods(aspectClass)) { // getAdvisorMethods 用于返回不包含 @Pointcut 注解的方法
+			// 为每个方法分别调用 getAdvisor 方法，返回InstantiationModelAwarePointcutAdvisorImpl实例
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
 				advisors.add(advisor);
@@ -137,7 +139,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		// Find introduction fields.
 		for (Field field : aspectClass.getDeclaredFields()) {
-			Advisor advisor = getDeclareParentsAdvisor(field);
+			Advisor advisor = getDeclareParentsAdvisor(field); // @DeclareParents注解
 			if (advisor != null) {
 				advisors.add(advisor);
 			}
@@ -149,12 +151,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithMethods(aspectClass, method -> {
-			// Exclude pointcuts
+			// Exclude pointcuts 没有标注@Pointcut注解
 			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
 				methods.add(method);
 			}
 		});
-		methods.sort(METHOD_COMPARATOR);
+		methods.sort(METHOD_COMPARATOR); // 先根据Advice注解比较，再根据方法名比较
 		return methods;
 	}
 
@@ -189,18 +191,21 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
 
+		// 创建切点
 		AspectJExpressionPointcut expressionPointcut = getPointcut(
 				candidateAdviceMethod, aspectInstanceFactory.getAspectMetadata().getAspectClass());
 		if (expressionPointcut == null) {
 			return null;
 		}
 
+		// 创建advice
 		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
 				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
 
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
+		// 找到通知注解，包装成AspectJAnnotation
 		AspectJAnnotation<?> aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
@@ -209,7 +214,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
-		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
+		ajexp.setExpression(aspectJAnnotation.getPointcutExpression()); // 切点表达式
 		if (this.beanFactory != null) {
 			ajexp.setBeanFactory(this.beanFactory);
 		}
@@ -223,8 +228,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
 
 		Class<?> candidateAspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();
-		validate(candidateAspectClass);
+		validate(candidateAspectClass); // 验证切面类
 
+		// 获取 Advice 注解
 		AspectJAnnotation<?> aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
@@ -240,11 +246,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found AspectJ method: " + candidateAdviceMethod);
+			logger.debug("Found AspectJ method: " + candidateAdviceMethod); // debug
 		}
 
 		AbstractAspectJAdvice springAdvice;
 
+		// 按照注解类型生成相应的 Advice 实现类
 		switch (aspectJAnnotation.getAnnotationType()) {
 			case AtPointcut:
 				if (logger.isDebugEnabled()) {
@@ -268,7 +275,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterReturning afterReturningAnnotation = (AfterReturning) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterReturningAnnotation.returning())) {
-					springAdvice.setReturningName(afterReturningAnnotation.returning());
+					springAdvice.setReturningName(afterReturningAnnotation.returning()); // 设置返回值参数名
 				}
 				break;
 			case AtAfterThrowing:
@@ -276,7 +283,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterThrowing afterThrowingAnnotation = (AfterThrowing) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
-					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
+					springAdvice.setThrowingName(afterThrowingAnnotation.throwing()); // 设置异常名
 				}
 				break;
 			default:
@@ -284,9 +291,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 						"Unsupported advice type on method: " + candidateAdviceMethod);
 		}
 
-		// Now to configure the advice...
+		// Now to configure the advice... 配置advice
 		springAdvice.setAspectName(aspectName);
 		springAdvice.setDeclarationOrder(declarationOrder);
+		/*
+		 * 获取方法的参数列表名称，比如方法 int sum(int numX, int numY),
+		 * getParameterNames(sum) 得到 argNames = [numX, numY]
+		 */
 		String[] argNames = this.parameterNameDiscoverer.getParameterNames(candidateAdviceMethod);
 		if (argNames != null) {
 			springAdvice.setArgumentNamesFromStringArray(argNames);

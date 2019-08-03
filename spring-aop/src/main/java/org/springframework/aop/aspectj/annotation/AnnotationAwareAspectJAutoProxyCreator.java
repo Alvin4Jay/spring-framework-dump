@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link AspectJAwareAdvisorAutoProxyCreator} subclass that processes all AspectJ
- * annotation aspects in the current application context, as well as Spring Advisors.
+ * annotation aspects in the current application context, as well as Spring Advisors. 处理@Aspect切面Bean
  *
  * <p>Any AspectJ annotated classes will automatically be recognized, and their
  * advice applied if Spring AOP's proxy-based model is capable of applying it.
@@ -88,11 +88,13 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 
 	@Override
 	protected List<Advisor> findCandidateAdvisors() {
+		// 调用父类方法从容器中查找所有的通知器
 		// Add all the Spring advisors found according to superclass rules.
-		List<Advisor> advisors = super.findCandidateAdvisors();
+		List<Advisor> advisors = super.findCandidateAdvisors(); // 找出实现了Advisor接口的类
+		// 解析 @Aspect 注解，并构建通知器
 		// Build Advisors for all AspectJ aspects in the bean factory.
 		if (this.aspectJAdvisorsBuilder != null) {
-			advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
+			advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors()); // buildAspectJAdvisors()重点
 		}
 		return advisors;
 	}
@@ -117,7 +119,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	 * {@code null} and all beans are included. If "includePatterns" is non-null,
 	 * then one of the patterns must match.
 	 */
-	protected boolean isEligibleAspectBean(String beanName) {
+	protected boolean isEligibleAspectBean(String beanName) { // 过滤切面
 		if (this.includePatterns == null) {
 			return true;
 		}

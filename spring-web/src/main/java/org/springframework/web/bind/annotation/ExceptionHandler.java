@@ -59,9 +59,9 @@ import java.lang.annotation.Target;
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet API.
  * <li>{@link org.springframework.ui.Model} as an alternative to returning
- * a model map from the handler method. Note that the provided model is not
- * pre-populated with regular model attributes and therefore always empty,
- * as a convenience for preparing the model for an exception-specific view.
+ * a instantiate.model map from the handler method. Note that the provided instantiate.model is not
+ * pre-populated with regular instantiate.model attributes and therefore always empty,
+ * as a convenience for preparing the instantiate.model for an exception-specific view.
  * </ul>
  *
  * <p>The following return types are supported for handler methods:
@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
  * <li>A {@code ModelAndView} object (from Servlet MVC).
  * <li>A {@link org.springframework.ui.Model} object, with the view name implicitly
  * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
- * <li>A {@link java.util.Map} object for exposing a model,
+ * <li>A {@link java.util.Map} object for exposing a instantiate.model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
  * <li>A {@link org.springframework.web.servlet.View} object.

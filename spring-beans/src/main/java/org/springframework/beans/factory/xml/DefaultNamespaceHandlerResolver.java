@@ -115,7 +115,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
-		Map<String, Object> handlerMappings = getHandlerMappings();
+		Map<String, Object> handlerMappings = getHandlerMappings(); // uri--NamespaceHandler映射
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
 		if (handlerOrClassName == null) {
 			return null;
@@ -131,9 +131,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
 							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 				}
+				// 实例化NameSpaceHandler
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
-				namespaceHandler.init();
-				handlerMappings.put(namespaceUri, namespaceHandler);
+				namespaceHandler.init(); // 调用init方法，注册BeanDefinitionParser
+				handlerMappings.put(namespaceUri, namespaceHandler); // 缓存
 				return namespaceHandler;
 			}
 			catch (ClassNotFoundException ex) {
@@ -148,19 +149,19 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	}
 
 	/**
-	 * Load the specified NamespaceHandler mappings lazily.
+	 * Load the specified NamespaceHandler mappings lazily. 懒加载NamespaceHandler映射(从文件读取)
 	 */
 	private Map<String, Object> getHandlerMappings() {
 		Map<String, Object> handlerMappings = this.handlerMappings;
 		if (handlerMappings == null) {
 			synchronized (this) {
 				handlerMappings = this.handlerMappings;
-				if (handlerMappings == null) {
+				if (handlerMappings == null) { // double check
 					if (logger.isTraceEnabled()) {
 						logger.trace("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
 					}
 					try {
-						Properties mappings =
+						Properties mappings = // 加载handler
 								PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 						if (logger.isTraceEnabled()) {
 							logger.trace("Loaded NamespaceHandler mappings: " + mappings);

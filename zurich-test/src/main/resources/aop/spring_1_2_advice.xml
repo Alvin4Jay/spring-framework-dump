@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="orderServiceImpl" class="aop.service.impl.OrderServiceImpl"/>
+	<bean id="userServiceImpl" class="aop.service.impl.UserServiceImpl"/>
+
+	<!--定义两个 advice-->
+	<bean id="logArgsAdvice" class="aop.aop_spring_1_2.LogArgsAdvice"/>
+	<bean id="logResultAdvice" class="aop.aop_spring_1_2.LogResultAdvice"/>
+
+	<bean id="userServiceProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces">
+			<list>
+				<value>aop.service.UserService</value>
+			</list>
+		</property>
+
+		<property name="target" ref="userServiceImpl"/>
+
+		<property name="interceptorNames">
+			<list>
+				<value>logArgsAdvice</value>
+				<value>logResultAdvice</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--同理，我们也可以配置一个 orderServiceProxy......-->
+
+</beans>

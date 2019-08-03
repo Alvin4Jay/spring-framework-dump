@@ -110,7 +110,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
-		if (!ajType.isAspect()) {
+		if (!ajType.isAspect()) { // 如果没有@Aspect注解，则验证不通过
 			throw new NotAnAtAspectException(aspectClass);
 		}
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
@@ -131,6 +131,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	@Nullable
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
 		for (Class<?> clazz : ASPECTJ_ANNOTATION_CLASSES) {
+			// 查找注解
 			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
@@ -191,9 +192,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		public AspectJAnnotation(A annotation) {
 			this.annotation = annotation;
-			this.annotationType = determineAnnotationType(annotation);
+			this.annotationType = determineAnnotationType(annotation); // 确定注解类型
 			try {
-				this.pointcutExpression = resolveExpression(annotation);
+				this.pointcutExpression = resolveExpression(annotation); // 解析切点表达式
 				Object argNames = AnnotationUtils.getValue(annotation, "argNames");
 				this.argumentNames = (argNames instanceof String ? (String) argNames : "");
 			}

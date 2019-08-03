@@ -53,16 +53,18 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 		// This is somewhat tricky... We have to process introductions first,
 		// but we need to preserve order in the ultimate list.
+		// registry为DefaultAdvisorAdapterRegistry类型
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		Advisor[] advisors = config.getAdvisors();
 		List<Object> interceptorList = new ArrayList<>(advisors.length);
 		Class<?> actualClass = (targetClass != null ? targetClass : method.getDeclaringClass());
 		Boolean hasIntroductions = null;
 
-		for (Advisor advisor : advisors) {
+		for (Advisor advisor : advisors) { // 遍历通知器列表
 			if (advisor instanceof PointcutAdvisor) {
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
+				// 调用ClassFilter对bean类型进行匹配，无法匹配则说明当前通知器不适合应用在当前bean上。已经预过滤的直接进入下面的逻辑
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					boolean match;
@@ -73,11 +75,13 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 						match = ((IntroductionAwareMethodMatcher) mm).matches(method, actualClass, hasIntroductions);
 					}
 					else {
+						// 通过方法匹配器对目标方法进行匹配
 						match = mm.matches(method, actualClass);
 					}
 					if (match) {
+						// 将advisor中的advice转成相应的拦截器
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
-						if (mm.isRuntime()) {
+						if (mm.isRuntime()) { // 运行时需要调用3个参数的match方法进行匹配
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
 							for (MethodInterceptor interceptor : interceptors) {
@@ -92,6 +96,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 			}
 			else if (advisor instanceof IntroductionAdvisor) {
 				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
+				// IntroductionAdvisor类型的通知器，仅需进行类级别的匹配即可
 				if (config.isPreFiltered() || ia.getClassFilter().matches(actualClass)) {
 					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					interceptorList.addAll(Arrays.asList(interceptors));

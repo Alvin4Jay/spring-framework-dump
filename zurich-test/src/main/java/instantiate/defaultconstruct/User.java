@@ -1,4 +1,6 @@
-package model;
+package instantiate.defaultconstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 用户模型
@@ -6,6 +8,9 @@ package model;
  * @author xuanjian
  */
 public class User {
+
+	@Autowired
+	private Address address;
 
     /**
      * 自增长
@@ -33,12 +38,21 @@ public class User {
         this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" +
+				"address=" + address +
+				", id=" + id +
+				", name='" + name + '\'' +
+				'}';
+	}
 
 }

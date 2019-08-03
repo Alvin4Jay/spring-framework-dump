@@ -77,7 +77,9 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 		try {
 			String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
+			// 获取资源
 			Resource resource = this.resourceLoader.getResource(resourcePath);
+			// 返回SimpleMetadataReader实例
 			return getMetadataReader(resource);
 		}
 		catch (FileNotFoundException ex) {
@@ -87,10 +89,12 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 			if (lastDotIndex != -1) {
 				String innerClassName =
 						className.substring(0, lastDotIndex) + '$' + className.substring(lastDotIndex + 1);
+				// 内部类
 				String innerClassResourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 						ClassUtils.convertClassNameToResourcePath(innerClassName) + ClassUtils.CLASS_FILE_SUFFIX;
 				Resource innerClassResource = this.resourceLoader.getResource(innerClassResourcePath);
 				if (innerClassResource.exists()) {
+					// 返回SimpleMetadataReader实例
 					return getMetadataReader(innerClassResource);
 				}
 			}

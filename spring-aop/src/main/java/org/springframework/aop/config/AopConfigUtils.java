@@ -52,7 +52,7 @@ public abstract class AopConfigUtils {
 			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	/**
-	 * Stores the auto proxy creator classes in escalation order.
+	 * Stores the auto proxy creator classes in escalation order. 升级顺序??
 	 */
 	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<>(3);
 
@@ -96,7 +96,7 @@ public abstract class AopConfigUtils {
 	@Nullable
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		// 注册或者更新AspectJAutoProxyCreator
 		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 
@@ -119,21 +119,23 @@ public abstract class AopConfigUtils {
 			Class<?> cls, BeanDefinitionRegistry registry, @Nullable Object source) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
-
+		// 判断internalAutoProxyCreator是否存在
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
-				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName()); // 计算优先级
 				int requiredPriority = findPriorityForClass(cls);
-				if (currentPriority < requiredPriority) {
+				if (currentPriority < requiredPriority) { // 如果新优先级比原来的大，则更新类名
 					apcDefinition.setBeanClassName(cls.getName());
 				}
 			}
 			return null;
 		}
 
+		// 注册BeanDefinition
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
+		// 设置最高的顺序
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);

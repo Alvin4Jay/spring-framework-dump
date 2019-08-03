@@ -73,16 +73,18 @@ class ConditionEvaluator {
 
 	/**
 	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 * 根据@Conditional的条件，确定是否跳过该对象
 	 * @param metadata the meta data
 	 * @param phase the phase of the call
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
-			return false;
+			return false; // 若没有注解@Conditional或者没有注解是元注解@Conditional的，则返回false
 		}
 
 		if (phase == null) {
+			// 类注解元数据，且是配置类
 			if (metadata instanceof AnnotationMetadata &&
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
@@ -91,22 +93,23 @@ class ConditionEvaluator {
 		}
 
 		List<Condition> conditions = new ArrayList<>();
-		for (String[] conditionClasses : getConditionClasses(metadata)) {
+		for (String[] conditionClasses : getConditionClasses(metadata)) { // 获取Condition类
 			for (String conditionClass : conditionClasses) {
-				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
+				Condition condition = getCondition(conditionClass, this.context.getClassLoader()); // 获取Condition对象
 				conditions.add(condition);
 			}
 		}
 
-		AnnotationAwareOrderComparator.sort(conditions);
+		AnnotationAwareOrderComparator.sort(conditions); // 排序
 
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
 			if (condition instanceof ConfigurationCondition) {
 				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 			}
-			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
-				return true;
+			// 若requiredPhase是null或者当前phase是requiredPhase，则进行条件匹配(否则不进行匹配)。若不匹配，直接跳过
+			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) { // 判断条件是否匹配
+				return true;// 只要有一个不匹配就跳过
 			}
 		}
 
@@ -122,7 +125,7 @@ class ConditionEvaluator {
 
 	private Condition getCondition(String conditionClassName, @Nullable ClassLoader classloader) {
 		Class<?> conditionClass = ClassUtils.resolveClassName(conditionClassName, classloader);
-		return (Condition) BeanUtils.instantiateClass(conditionClass);
+		return (Condition) BeanUtils.instantiateClass(conditionClass); // 反射实例化
 	}
 
 

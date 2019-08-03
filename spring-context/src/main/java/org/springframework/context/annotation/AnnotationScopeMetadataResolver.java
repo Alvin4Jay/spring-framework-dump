@@ -77,13 +77,13 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
-		if (definition instanceof AnnotatedBeanDefinition) {
+		if (definition instanceof AnnotatedBeanDefinition) { // ScannedGenericBeanDefinition
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(
 					annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
-				metadata.setScopeName(attributes.getString("value"));
-				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
+				metadata.setScopeName(attributes.getString("value")); // 作用域名
+				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode"); // ScopedProxyMode
 				if (proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}

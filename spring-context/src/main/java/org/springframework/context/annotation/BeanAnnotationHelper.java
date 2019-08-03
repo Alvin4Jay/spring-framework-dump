@@ -41,14 +41,16 @@ abstract class BeanAnnotationHelper {
 		return AnnotatedElementUtils.hasAnnotation(method, Bean.class);
 	}
 
+	// 根据@Bean方法，确定beanName
 	public static String determineBeanNameFor(Method beanMethod) {
 		String beanName = beanNameCache.get(beanMethod);
 		if (beanName == null) {
-			// By default, the bean name is the name of the @Bean-annotated method
+			// By default, the bean name is the name of the @Bean-annotated method 方法名为默认的bean name
 			beanName = beanMethod.getName();
-			// Check to see if the user has explicitly set a custom bean name...
+			// Check to see if the user has explicitly set a custom bean name...查看用户是否显示指定bean name
 			AnnotationAttributes bean =
-					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Bean.class, false, false);
+					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Bean.class,
+							false, false);
 			if (bean != null) {
 				String[] names = bean.getStringArray("name");
 				if (names.length > 0) {
@@ -63,8 +65,11 @@ abstract class BeanAnnotationHelper {
 	public static boolean isScopedProxy(Method beanMethod) {
 		Boolean scopedProxy = scopedProxyCache.get(beanMethod);
 		if (scopedProxy == null) {
+			// 获取@Scope注解属性
 			AnnotationAttributes scope =
-					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Scope.class, false, false);
+					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Scope.class,
+							false, false);
+			// 判断是否代理
 			scopedProxy = (scope != null && scope.getEnum("proxyMode") != ScopedProxyMode.NO);
 			scopedProxyCache.put(beanMethod, scopedProxy);
 		}

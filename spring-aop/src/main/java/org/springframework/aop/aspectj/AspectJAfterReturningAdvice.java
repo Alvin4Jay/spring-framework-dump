@@ -57,7 +57,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 
 	@Override
 	public void setReturningName(String name) {
-		setReturningNameNoCheck(name);
+		setReturningNameNoCheck(name); // 设置返回值参数
 	}
 
 	@Override

@@ -112,7 +112,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.proxy = proxy;
 		this.target = target;
 		this.targetClass = targetClass;
-		this.method = BridgeMethodResolver.findBridgedMethod(method);
+		this.method = BridgeMethodResolver.findBridgedMethod(method); // 找到原方法
 		this.arguments = AopProxyUtils.adaptArgumentsIfNecessary(method, arguments);
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
@@ -158,9 +158,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
-		//	We start with an index of -1 and increment early.
+		//	We start with an index of -1 and increment early. 拦截器链中的最后一个拦截器执行完后，即可执行目标方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
-			return invokeJoinpoint();
+			return invokeJoinpoint(); // 调用目标方法
 		}
 
 		Object interceptorOrInterceptionAdvice =
@@ -171,18 +171,21 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			InterceptorAndDynamicMethodMatcher dm =
 					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
+			// 调用具有三个参数(3-args)的matches方法动态匹配目标方法，
+			// 两个参数(2-args)的matches方法用于静态匹配
 			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
-				return dm.interceptor.invoke(this);
+				return dm.interceptor.invoke(this); // 匹配后调用拦截器逻辑
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
-				return proceed();
+				return proceed(); // 如果匹配失败，则忽略当前的拦截器，调用下一个拦截器
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
+			// 调用拦截器逻辑，并传递当前ReflectiveMethodInvocation对象本身
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}

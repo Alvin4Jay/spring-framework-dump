@@ -163,7 +163,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		this.registry = registry;
 
 		if (useDefaultFilters) {
-			registerDefaultFilters();
+			registerDefaultFilters(); // 注册默认的Filter
 		}
 		setEnvironment(environment);
 		setResourceLoader(resourceLoader);
@@ -261,6 +261,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	}
 
 	/**
+	 * 扫描指定的包，并注册BeanDefinition到BeanDefinitionRegistry。该方法不会注册@Autowire @PreDestroy等注解的后置处理器
+	 *
 	 * Perform a scan within the specified base packages,
 	 * returning the registered bean definitions.
 	 * <p>This method does <i>not</i> register an annotation config processor
@@ -272,23 +274,27 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
-			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			Set<BeanDefinition> candidates = findCandidateComponents(basePackage); // 找出所有候选的组件
 			for (BeanDefinition candidate : candidates) {
+				// 解析scope
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+				// 生成bean name
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					// 解析公共的注解
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
-				if (checkCandidate(beanName, candidate)) {
+				if (checkCandidate(beanName, candidate)) { // 检查对应beanName的BeanDefinition是否已存在
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					// 生成scope代理
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
-					registerBeanDefinition(definitionHolder, this.registry);
+					registerBeanDefinition(definitionHolder, this.registry); // 注册BeanDefinition
 				}
 			}
 		}
@@ -302,8 +308,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param beanName the generated bean name for the given bean
 	 */
 	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
-		beanDefinition.applyDefaults(this.beanDefinitionDefaults);
+		beanDefinition.applyDefaults(this.beanDefinitionDefaults); // 设置默认值
 		if (this.autowireCandidatePatterns != null) {
+			// 设置是否是依赖注入的候选
 			beanDefinition.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
 		}
 	}
@@ -340,7 +347,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
-		if (isCompatible(beanDefinition, existingDef)) {
+		if (isCompatible(beanDefinition, existingDef)) { // 是否兼容
 			return false;
 		}
 		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +

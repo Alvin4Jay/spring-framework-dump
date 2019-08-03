@@ -88,9 +88,11 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		return this.annotationType;
 	}
 
+	// 自己匹配
 	@Override
 	protected boolean matchSelf(MetadataReader metadataReader) {
-		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata(); // metadata: AnnotationMetadataReadingVisitor实例
+		// 检查类上是否存在指定注解，或者考虑元注解，并且指定元注解存在
 		return metadata.hasAnnotation(this.annotationType.getName()) ||
 				(this.considerMetaAnnotations && metadata.hasMetaAnnotation(this.annotationType.getName()));
 	}
@@ -98,13 +100,13 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	@Override
 	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {
-		return hasAnnotation(superClassName);
+		return hasAnnotation(superClassName); // 判断超类上注解是否存在
 	}
 
 	@Override
 	@Nullable
 	protected Boolean matchInterface(String interfaceName) {
-		return hasAnnotation(interfaceName);
+		return hasAnnotation(interfaceName);// 判断接口上注解是否存在
 	}
 
 	@Nullable
@@ -116,10 +118,12 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 			if (!this.annotationType.getName().startsWith("java")) {
 				// Standard Java types do not have non-standard annotations on them ->
 				// skip any load attempt, in particular for Java language interfaces.
+				// JDK的类不会注解非标准的注解
 				return false;
 			}
 			try {
-				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader());
+				Class<?> clazz = ClassUtils.forName(typeName, getClass().getClassLoader()); // 加载类
+				// 根据是否检查元注解，分别查找
 				return ((this.considerMetaAnnotations ? AnnotationUtils.getAnnotation(clazz, this.annotationType) :
 						clazz.getAnnotation(this.annotationType)) != null);
 			}

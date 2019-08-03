@@ -456,23 +456,23 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public void merge(ConfigurableEnvironment parent) {
 		for (PropertySource<?> ps : parent.getPropertySources()) {
 			if (!this.propertySources.contains(ps.getName())) {
-				this.propertySources.addLast(ps);
+				this.propertySources.addLast(ps); // 合并PropertySource List
 			}
 		}
 		String[] parentActiveProfiles = parent.getActiveProfiles();
 		if (!ObjectUtils.isEmpty(parentActiveProfiles)) {
 			synchronized (this.activeProfiles) {
 				for (String profile : parentActiveProfiles) {
-					this.activeProfiles.add(profile);
+					this.activeProfiles.add(profile); // 合并激活的profile配置 Set
 				}
 			}
 		}
 		String[] parentDefaultProfiles = parent.getDefaultProfiles();
 		if (!ObjectUtils.isEmpty(parentDefaultProfiles)) {
 			synchronized (this.defaultProfiles) {
-				this.defaultProfiles.remove(RESERVED_DEFAULT_PROFILE_NAME);
+				this.defaultProfiles.remove(RESERVED_DEFAULT_PROFILE_NAME); // 去除 'default' profile
 				for (String profile : parentDefaultProfiles) {
-					this.defaultProfiles.add(profile);
+					this.defaultProfiles.add(profile); // 合并默认的配置 Set
 				}
 			}
 		}

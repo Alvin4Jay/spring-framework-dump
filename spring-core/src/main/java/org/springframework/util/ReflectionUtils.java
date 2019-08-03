@@ -543,7 +543,7 @@ public abstract class ReflectionUtils {
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
-		Method[] methods = getDeclaredMethods(clazz);
+		Method[] methods = getDeclaredMethods(clazz); // 该类声明的方法和从父类继承的默认方法
 		for (Method method : methods) {
 			try {
 				mc.doWith(method);
@@ -660,13 +660,13 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 * @see Class#getDeclaredMethods()
 	 */
-	private static Method[] getDeclaredMethods(Class<?> clazz) {
+	private static Method[] getDeclaredMethods(Class<?> clazz) { // 获取该类声明的方法和从父类继承的默认方法
 		Assert.notNull(clazz, "Class must not be null");
-		Method[] result = declaredMethodsCache.get(clazz);
+		Method[] result = declaredMethodsCache.get(clazz); // 先检查缓存
 		if (result == null) {
 			try {
-				Method[] declaredMethods = clazz.getDeclaredMethods();
-				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
+				Method[] declaredMethods = clazz.getDeclaredMethods(); // 不包含从父类继承的方法
+				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz); // 找出默认方法
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];
 					System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
@@ -694,7 +694,7 @@ public abstract class ReflectionUtils {
 		List<Method> result = null;
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			for (Method ifcMethod : ifc.getMethods()) {
-				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
+				if (!Modifier.isAbstract(ifcMethod.getModifiers())) { // 默认方法
 					if (result == null) {
 						result = new ArrayList<>();
 					}
@@ -714,9 +714,9 @@ public abstract class ReflectionUtils {
 	 * @see #doWithFields
 	 */
 	public static void doWithLocalFields(Class<?> clazz, FieldCallback fc) {
-		for (Field field : getDeclaredFields(clazz)) {
+		for (Field field : getDeclaredFields(clazz)) { // 遍历所有声明的field
 			try {
-				fc.doWith(field);
+				fc.doWith(field); // 执行回调
 			}
 			catch (IllegalAccessException ex) {
 				throw new IllegalStateException("Not allowed to access field '" + field.getName() + "': " + ex);
@@ -777,7 +777,7 @@ public abstract class ReflectionUtils {
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
 			try {
-				result = clazz.getDeclaredFields();
+				result = clazz.getDeclaredFields(); // 获取所有声明的field
 				declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
 			}
 			catch (Throwable ex) {

@@ -1075,6 +1075,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			Set<MethodOverride> overrides = getMethodOverrides().getOverrides();
 			synchronized (overrides) {
 				for (MethodOverride mo : overrides) {
+					// 检查方法是否存在
 					prepareMethodOverride(mo);
 				}
 			}
@@ -1091,12 +1092,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
 		if (count == 0) {
+			// 对应方法名的方法个数为0，抛出异常，验证失败
 			throw new BeanDefinitionValidationException(
 					"Invalid method override: no method with name '" + mo.getMethodName() +
 					"' on class [" + getBeanClassName() + "]");
 		}
 		else if (count == 1) {
-			// Mark override as not overloaded, to avoid the overhead of arg type checking.
+			// Mark override as not overloaded, to avoid the overhead of arg type checking. 非方法重载
 			mo.setOverloaded(false);
 		}
 	}

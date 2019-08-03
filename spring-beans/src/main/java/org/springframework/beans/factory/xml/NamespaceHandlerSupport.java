@@ -70,6 +70,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 如ComponentScanBeanDefinitionParser
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
@@ -80,8 +81,8 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 */
 	@Nullable
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
-		String localName = parserContext.getDelegate().getLocalName(element);
-		BeanDefinitionParser parser = this.parsers.get(localName);
+		String localName = parserContext.getDelegate().getLocalName(element); // 如component-scan
+		BeanDefinitionParser parser = this.parsers.get(localName); // 如ComponentScanBeanDefinitionParser
 		if (parser == null) {
 			parserContext.getReaderContext().fatal(
 					"Cannot locate BeanDefinitionParser for element [" + localName + "]", element);

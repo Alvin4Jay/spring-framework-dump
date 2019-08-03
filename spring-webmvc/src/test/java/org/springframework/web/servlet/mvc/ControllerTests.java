@@ -50,8 +50,8 @@ public class ControllerTests {
 		pvc.setViewName(viewName);
 		// We don't care about the params.
 		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest("GET", "foo.html"), new MockHttpServletResponse());
-		assertTrue("model has no data", mv.getModel().size() == 0);
-		assertTrue("model has correct viewname", mv.getViewName().equals(viewName));
+		assertTrue("instantiate.model has no data", mv.getModel().size() == 0);
+		assertTrue("instantiate.model has correct viewname", mv.getViewName().equals(viewName));
 		assertTrue("getViewName matches", pvc.getViewName().equals(viewName));
 	}
 

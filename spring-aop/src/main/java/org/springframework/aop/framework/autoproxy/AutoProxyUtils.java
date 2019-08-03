@@ -112,6 +112,7 @@ public abstract class AutoProxyUtils {
 			ConfigurableListableBeanFactory beanFactory, @Nullable String beanName, Class<?> targetClass) {
 
 		if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+			// 设置BeanDefinition的属性，暴露targetClass
 			beanFactory.getMergedBeanDefinition(beanName).setAttribute(ORIGINAL_TARGET_CLASS_ATTRIBUTE, targetClass);
 		}
 	}

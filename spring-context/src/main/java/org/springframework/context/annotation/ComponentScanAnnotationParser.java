@@ -78,21 +78,22 @@ class ComponentScanAnnotationParser {
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
-		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
+		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass); // 是否使用继承的BeanNameGenerator
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
 		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
-			scanner.setScopedProxyMode(scopedProxyMode);
+			scanner.setScopedProxyMode(scopedProxyMode); // 代理模式设置
 		}
 		else {
 			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
 
-		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+		scanner.setResourcePattern(componentScan.getString("resourcePattern")); // 资源模式
 
+		// 获取@ComponentScan注解的includeFilters和excludeFilters的值，是AnnotationAttributes[]数组，即@Filter注解属性的数组
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addIncludeFilter(typeFilter);
@@ -106,7 +107,7 @@ class ComponentScanAnnotationParser {
 
 		boolean lazyInit = componentScan.getBoolean("lazyInit");
 		if (lazyInit) {
-			scanner.getBeanDefinitionDefaults().setLazyInit(true);
+			scanner.getBeanDefinitionDefaults().setLazyInit(true); // 设置默认懒加载
 		}
 
 		Set<String> basePackages = new LinkedHashSet<>();
@@ -119,40 +120,41 @@ class ComponentScanAnnotationParser {
 		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
 			basePackages.add(ClassUtils.getPackageName(clazz));
 		}
-		if (basePackages.isEmpty()) {
+		if (basePackages.isEmpty()) { // 如果没有指定basePackages、basePackageClasses属性，则以当前的声明类所在的包开始扫描
 			basePackages.add(ClassUtils.getPackageName(declaringClass));
 		}
 
 		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {
 			@Override
 			protected boolean matchClassName(String className) {
-				return declaringClass.equals(className);
+				return declaringClass.equals(className); // 扫描时排除掉自己
 			}
 		});
-		return scanner.doScan(StringUtils.toStringArray(basePackages));
+		return scanner.doScan(StringUtils.toStringArray(basePackages)); // 扫描
 	}
 
-	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
+	// 根据@Filter注解属性，获取TypeFilter集合
+	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) { // filterAttributes: @Filter注解属性
 		List<TypeFilter> typeFilters = new ArrayList<>();
-		FilterType filterType = filterAttributes.getEnum("type");
+		FilterType filterType = filterAttributes.getEnum("type"); // 过滤类型
 
 		for (Class<?> filterClass : filterAttributes.getClassArray("classes")) {
 			switch (filterType) {
 				case ANNOTATION:
-					Assert.isAssignable(Annotation.class, filterClass,
+					Assert.isAssignable(Annotation.class, filterClass, // filterClass需要是注解
 							"@ComponentScan ANNOTATION type filter requires an annotation type");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
 					break;
 				case ASSIGNABLE_TYPE:
-					typeFilters.add(new AssignableTypeFilter(filterClass));
+					typeFilters.add(new AssignableTypeFilter(filterClass)); // 匹配的类是filterClass类或子类
 					break;
 				case CUSTOM:
-					Assert.isAssignable(TypeFilter.class, filterClass,
+					Assert.isAssignable(TypeFilter.class, filterClass, // filterClass需要实现TypeFilter接口
 							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
 					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
-					ParserStrategyUtils.invokeAwareMethods(
+					ParserStrategyUtils.invokeAwareMethods( // 回调xxxAware方法
 							filter, this.environment, this.resourceLoader, this.registry);
 					typeFilters.add(filter);
 					break;

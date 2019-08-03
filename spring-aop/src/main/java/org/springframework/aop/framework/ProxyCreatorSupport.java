@@ -100,7 +100,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 */
 	protected final synchronized AopProxy createAopProxy() {
 		if (!this.active) {
-			activate();
+			activate(); // 设置标记
 		}
 		return getAopProxyFactory().createAopProxy(this);
 	}

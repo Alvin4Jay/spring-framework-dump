@@ -71,12 +71,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		if (definition instanceof AnnotatedBeanDefinition) {
 			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
 			if (StringUtils.hasText(beanName)) {
-				// Explicit bean name found.
+				// Explicit bean name found. 显式指定的名称
 				return beanName;
 			}
 		}
 		// Fallback: generate a unique default bean name.
-		return buildDefaultBeanName(definition, registry);
+		return buildDefaultBeanName(definition, registry); // 生成一个默认的独一无二的名称
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata amd = annotatedDef.getMetadata();
-		Set<String> types = amd.getAnnotationTypes();
+		Set<String> types = amd.getAnnotationTypes(); // 类上的所有注解
 		String beanName = null;
 		for (String type : types) {
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);

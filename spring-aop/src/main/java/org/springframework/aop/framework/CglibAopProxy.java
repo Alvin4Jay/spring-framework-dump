@@ -165,9 +165,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Class<?> rootClass = this.advised.getTargetClass();
 			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 
-			Class<?> proxySuperClass = rootClass;
-			if (ClassUtils.isCglibProxyClass(rootClass)) {
-				proxySuperClass = rootClass.getSuperclass();
+			Class<?> proxySuperClass = rootClass; // 代理超类
+			if (ClassUtils.isCglibProxyClass(rootClass)) { // 判断是否已经是CGLib生成的代理类
+				proxySuperClass = rootClass.getSuperclass(); // 获取原始类
 				Class<?>[] additionalInterfaces = rootClass.getInterfaces();
 				for (Class<?> additionalInterface : additionalInterfaces) {
 					this.advised.addInterface(additionalInterface);
@@ -175,7 +175,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 
 			// Validate the class, writing log messages as necessary.
-			validateClassIfNecessary(proxySuperClass, classLoader);
+			validateClassIfNecessary(proxySuperClass, classLoader); // 校验proxySuperClass
 
 			// Configure CGLIB Enhancer...
 			Enhancer enhancer = createEnhancer();
