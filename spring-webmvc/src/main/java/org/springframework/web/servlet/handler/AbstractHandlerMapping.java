@@ -283,15 +283,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 
 	/**
-	 * Initializes the interceptors.
+	 * Initializes the interceptors. 初始化拦截器
 	 * @see #extendInterceptors(java.util.List)
 	 * @see #initInterceptors()
 	 */
 	@Override
 	protected void initApplicationContext() throws BeansException {
-		extendInterceptors(this.interceptors);
-		detectMappedInterceptors(this.adaptedInterceptors);
-		initInterceptors();
+		extendInterceptors(this.interceptors); // 添加自定义的拦截器
+		detectMappedInterceptors(this.adaptedInterceptors); // 从容器中获取所有MappedInterceptor Bean
+		initInterceptors(); // 初始化拦截器，并适配拦截器
 	}
 
 	/**
@@ -307,6 +307,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * 获取所有MappedInterceptor bean实例
 	 * Detect beans of type {@link MappedInterceptor} and add them to the list of mapped interceptors.
 	 * <p>This is called in addition to any {@link MappedInterceptor MappedInterceptors} that may have been provided
 	 * via {@link #setInterceptors}, by default adding all beans of type {@link MappedInterceptor}
@@ -333,7 +334,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				this.adaptedInterceptors.add(adaptInterceptor(interceptor));
+				this.adaptedInterceptors.add(adaptInterceptor(interceptor)); // 将拦截器适配成HandlerInterceptor
 			}
 		}
 	}

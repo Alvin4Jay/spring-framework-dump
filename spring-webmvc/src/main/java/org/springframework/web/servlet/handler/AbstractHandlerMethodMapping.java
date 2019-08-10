@@ -206,7 +206,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handlerMethodsInitialized
 	 */
 	protected void initHandlerMethods() {
-		for (String beanName : getCandidateBeanNames()) {
+		for (String beanName : getCandidateBeanNames()) { // 获取所有的bean names
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				processCandidateBean(beanName);
 			}
@@ -215,18 +215,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Determine the names of candidate beans in the application context.
+	 * Determine the names of candidate beans in the application context. 获取所有的bean names
 	 * @since 5.1
 	 * @see #setDetectHandlerMethodsInAncestorContexts
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors
 	 */
 	protected String[] getCandidateBeanNames() {
-		return (this.detectHandlerMethodsInAncestorContexts ?
+		return (this.detectHandlerMethodsInAncestorContexts ? // false
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(obtainApplicationContext(), Object.class) :
 				obtainApplicationContext().getBeanNamesForType(Object.class));
 	}
 
 	/**
+	 * 确定bean的类型，判断是否是Handler，检测HandlerMathod
 	 * Determine the type of the specified candidate bean and call
 	 * {@link #detectHandlerMethods} if identified as a handler type.
 	 * <p>This implementation avoids bean creation through checking
@@ -240,15 +241,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void processCandidateBean(String beanName) {
 		Class<?> beanType = null;
 		try {
-			beanType = obtainApplicationContext().getType(beanName);
+			beanType = obtainApplicationContext().getType(beanName); // 获取Bean类型
 		}
 		catch (Throwable ex) {
-			// An unresolvable bean type, probably from a lazy bean - let's ignore it.
+			// An unresolvable bean type, probably from a lazy bean - let's ignore it. (忽略)
 			if (logger.isTraceEnabled()) {
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
-		if (beanType != null && isHandler(beanType)) {
+		if (beanType != null && isHandler(beanType)) { // 类上标注@Controller或@RequestMapping注解，即为Handler
 			detectHandlerMethods(beanName);
 		}
 	}
@@ -260,10 +261,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected void detectHandlerMethods(Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
-				obtainApplicationContext().getType((String) handler) : handler.getClass());
+				obtainApplicationContext().getType((String) handler) : handler.getClass()); // 获取handler type
 
 		if (handlerType != null) {
-			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			Class<?> userType = ClassUtils.getUserClass(handlerType); // 获取目标类
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -285,7 +286,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-
+		// 类名缩写
 		String formattedType = Arrays.stream(userType.getPackage().getName().split("\\."))
 				.map(p -> p.substring(0, 1))
 				.collect(Collectors.joining(".", "", ".")) + userType.getSimpleName();

@@ -313,7 +313,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
 		for (String urlPath : urlPaths) {
-			registerHandler(urlPath, beanName);
+			registerHandler(urlPath, beanName); // 每个url分别注册handler
 		}
 	}
 
@@ -352,13 +352,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				if (logger.isTraceEnabled()) {
 					logger.trace("Root mapping to " + getHandlerDescription(handler));
 				}
-				setRootHandler(resolvedHandler);
+				setRootHandler(resolvedHandler); // 设置root handler
 			}
 			else if (urlPath.equals("/*")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Default mapping to " + getHandlerDescription(handler));
 				}
-				setDefaultHandler(resolvedHandler);
+				setDefaultHandler(resolvedHandler); // 设置默认handler
 			}
 			else {
 				this.handlerMap.put(urlPath, resolvedHandler);

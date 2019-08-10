@@ -173,13 +173,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 
 	/**
+	 * 合并RequestMappingInfo，比如类级别和方法级别的RequestMappingInfo。
+	 *
 	 * Combine "this" request mapping info (i.e. the current instance) with another request mapping info instance.
 	 * <p>Example: combine type- and method-level request mappings.
 	 * @return a new request mapping info instance; never {@code null}
 	 */
 	@Override
 	public RequestMappingInfo combine(RequestMappingInfo other) {
-		String name = combineNames(other);
+		String name = combineNames(other); // 获取RequestMappingInfo的name
 		PatternsRequestCondition patterns = this.patternsCondition.combine(other.patternsCondition);
 		RequestMethodsRequestCondition methods = this.methodsCondition.combine(other.methodsCondition);
 		ParamsRequestCondition params = this.paramsCondition.combine(other.paramsCondition);

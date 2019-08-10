@@ -147,7 +147,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	@Override
 	public final void init() throws ServletException {
 
-		// Set bean properties from init parameters.
+		// Set bean properties from init parameters. 根据初始化参数，为当前的Servlet Bean设置Bean属性
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
@@ -155,7 +155,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
-				bw.setPropertyValues(pvs, true);
+				bw.setPropertyValues(pvs, true); // 设置Bean属性
 			}
 			catch (BeansException ex) {
 				if (logger.isErrorEnabled()) {
@@ -166,7 +166,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Let subclasses do whatever initialization they like.
-		initServletBean();
+		initServletBean(); // 初始化Servlet Bean
 	}
 
 	/**
@@ -203,6 +203,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 
 	/**
+	 * 根据ServletConfig初始化参数，创建ServletConfigPropertyValues。
 	 * PropertyValues implementation created from ServletConfig init parameters.
 	 */
 	private static class ServletConfigPropertyValues extends MutablePropertyValues {
@@ -220,6 +221,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
 
+			// 添加属性PropertyValue，并检查是否不存在需要的属性
 			Enumeration<String> paramNames = config.getInitParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String property = paramNames.nextElement();

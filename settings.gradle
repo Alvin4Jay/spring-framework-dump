@@ -30,4 +30,6 @@ rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
 }
 include 'zurich-test'
+include 'zurich-test:spring-mvc-origin'
+findProject(':zurich-test:spring-mvc-origin')?.name = 'spring-mvc-origin'
 

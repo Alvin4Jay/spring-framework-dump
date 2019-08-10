@@ -172,7 +172,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
-	 * Only used when "detectAllHandlerMappings" is turned off.
+	 * Only used when "detectAllHandlerMappings" is turned off. // false
 	 * @see #setDetectAllHandlerMappings
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
@@ -285,6 +285,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// by application developers.
 		try {
 			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, DispatcherServlet.class);
+			// 加载默认策略实现
 			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
@@ -490,7 +491,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * This implementation calls {@link #initStrategies}.
 	 */
 	@Override
-	protected void onRefresh(ApplicationContext context) {
+	protected void onRefresh(ApplicationContext context) { // context为DispatcherServlet创建的一个IoC子容器 WebApplicationContext
 		initStrategies(context);
 	}
 
@@ -498,10 +499,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Initialize the strategy objects that this servlet uses.
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
-	protected void initStrategies(ApplicationContext context) {
-		initMultipartResolver(context);
-		initLocaleResolver(context);
-		initThemeResolver(context);
+	protected void initStrategies(ApplicationContext context) { // ConfigurableWebApplicationContext
+		initMultipartResolver(context); // 初始化文件上传解析器
+		initLocaleResolver(context); // 初始化LocaleResolver
+		initThemeResolver(context); //初始化ThemeResolver
 		initHandlerMappings(context);
 		initHandlerAdapters(context);
 		initHandlerExceptionResolvers(context);
@@ -511,7 +512,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the MultipartResolver used by this class.
+	 * Initialize the MultipartResolver used by this class. 初始化MultipartResolver
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * no multipart handling is provided.
 	 */
@@ -526,7 +527,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// Default is no multipart resolver.
+			// Default is no multipart resolver. 默认无MultipartResolver
 			this.multipartResolver = null;
 			if (logger.isTraceEnabled()) {
 				logger.trace("No MultipartResolver '" + MULTIPART_RESOLVER_BEAN_NAME + "' declared");
@@ -535,7 +536,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the LocaleResolver used by this class.
+	 * Initialize the LocaleResolver used by this class. 初始化LocaleResolver
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to AcceptHeaderLocaleResolver.
 	 */
@@ -550,7 +551,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
+			// We need to use the default. 没找到用户定义的LocaleResolver，则使用默认值AcceptHeaderLocaleResolver
 			this.localeResolver = getDefaultStrategy(context, LocaleResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No LocaleResolver '" + LOCALE_RESOLVER_BEAN_NAME +
@@ -560,7 +561,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the ThemeResolver used by this class.
+	 * Initialize the ThemeResolver used by this class. 初始化ThemeResolver
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to a FixedThemeResolver.
 	 */
@@ -575,7 +576,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
+			// We need to use the default. 默认实现FixedThemeResolver
 			this.themeResolver = getDefaultStrategy(context, ThemeResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No ThemeResolver '" + THEME_RESOLVER_BEAN_NAME +
@@ -592,20 +593,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
+		// 是否检测出所有的HandlerMapping Bean，还是只检测name为handlerMapping的HandlerMapping Bean
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			// 找出所有的HandlerMapping Bean，包括父BeanFactory中的定义
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerMappings);
+				AnnotationAwareOrderComparator.sort(this.handlerMappings); // 排序
 			}
 		}
 		else {
 			try {
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
-				this.handlerMappings = Collections.singletonList(hm);
+				this.handlerMappings = Collections.singletonList(hm); // 一个
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, we'll add a default HandlerMapping later.
@@ -614,6 +617,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
+		// 默认：BeanNameUrlHandlerMapping, RequestMappingHandlerMapping
 		if (this.handlerMappings == null) {
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isTraceEnabled()) {
@@ -865,7 +869,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			for (String className : classNames) {
 				try {
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
-					Object strategy = createDefaultStrategy(context, clazz);
+					Object strategy = createDefaultStrategy(context, clazz); // 获取默认策略
 					strategies.add((T) strategy);
 				}
 				catch (ClassNotFoundException ex) {

@@ -109,7 +109,7 @@ public abstract class WebApplicationContextUtils {
 	@Nullable
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
 		Assert.notNull(sc, "ServletContext must not be null");
-		Object attr = sc.getAttribute(attrName);
+		Object attr = sc.getAttribute(attrName); // 获取属性
 		if (attr == null) {
 			return null;
 		}
@@ -273,6 +273,7 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
+	 * 替换servlet占位符属性源
 	 * Replace {@code Servlet}-based {@link StubPropertySource stub property sources} with
 	 * actual instances populated with the given {@code servletContext} and
 	 * {@code servletConfig} objects.
@@ -296,10 +297,12 @@ public abstract class WebApplicationContextUtils {
 		Assert.notNull(sources, "'propertySources' must not be null");
 		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
 		if (servletContext != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+			// servlet context替换占位符属性源
 			sources.replace(name, new ServletContextPropertySource(name, servletContext));
 		}
 		name = StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;
 		if (servletConfig != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+			// servlet config替换占位符属性源
 			sources.replace(name, new ServletConfigPropertySource(name, servletConfig));
 		}
 	}

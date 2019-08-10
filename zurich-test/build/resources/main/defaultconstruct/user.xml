@@ -32,9 +32,15 @@
 		<property name="id" value="1"/>
 	</bean>
 
-    <context:component-scan base-package="instantiate"/>
+	<bean id="address" class="instantiate.defaultconstruct.Address"/>
+
+	<context:component-scan base-package="instantiate.defaultconstruct">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+	</context:component-scan>
 
     <aop:aspectj-autoproxy/>
+
+	<context:annotation-config/>
 
     <!--<import resource="sss"/>
 

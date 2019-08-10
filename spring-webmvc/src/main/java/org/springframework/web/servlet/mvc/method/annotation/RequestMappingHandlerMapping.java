@@ -161,7 +161,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
 
-		super.afterPropertiesSet();
+		super.afterPropertiesSet(); //
 	}
 
 
@@ -196,6 +196,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	/**
+	 * 类上标注@Controller或@RequestMapping注解，即为Handler
 	 * {@inheritDoc}
 	 * <p>Expects a handler to have either a type-level @{@link Controller}
 	 * annotation or a type-level @{@link RequestMapping} annotation.
@@ -217,11 +218,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		RequestMappingInfo info = createRequestMappingInfo(method);
+		RequestMappingInfo info = createRequestMappingInfo(method); // 创建RequestMappingInfo
 		if (info != null) {
-			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
+			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType); // 获取类上的RequestMappingInfo
 			if (typeInfo != null) {
-				info = typeInfo.combine(info);
+				info = typeInfo.combine(info); // 比如类级别和方法级别的RequestMappingInfo
 			}
 			String prefix = getPathPrefix(handlerType);
 			if (prefix != null) {
@@ -246,6 +247,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 创建RequestMappingInfo
 	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
 	 * supplying the appropriate custom {@link RequestCondition} depending on whether
 	 * the supplied {@code annotatedElement} is a class or method.
@@ -254,6 +256,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		// 获取@RequestMapping注解
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
@@ -293,6 +296,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * 基于@RequestMapping注解信息，创建RequestMappingInfo。
+	 *
 	 * Create a {@link RequestMappingInfo} from the supplied
 	 * {@link RequestMapping @RequestMapping} annotation, which is either
 	 * a directly declared annotation, a meta-annotation, or the synthesized
@@ -301,6 +306,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
 
+		// 建造者模式构建RequestMappingInfo
 		RequestMappingInfo.Builder builder = RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())
@@ -316,7 +322,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Resolve placeholder values in the given array of patterns.
+	 * Resolve placeholder values in the given array of patterns. 解析patterns中的占位符
 	 * @return a new array with updated patterns
 	 */
 	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
