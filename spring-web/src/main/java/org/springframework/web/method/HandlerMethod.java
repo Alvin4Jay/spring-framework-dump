@@ -64,12 +64,12 @@ public class HandlerMethod {
 	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Object bean;
+	private final Object bean; // handler bean name
 
 	@Nullable
 	private final BeanFactory beanFactory;
 
-	private final Class<?> beanType;
+	private final Class<?> beanType; // handler bean type
 
 	private final Method method;
 
@@ -132,7 +132,7 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		Class<?> beanType = beanFactory.getType(beanName);
+		Class<?> beanType = beanFactory.getType(beanName); // handler bean class
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
 		}

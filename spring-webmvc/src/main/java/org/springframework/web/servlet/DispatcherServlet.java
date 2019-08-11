@@ -501,13 +501,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void initStrategies(ApplicationContext context) { // ConfigurableWebApplicationContext
 		initMultipartResolver(context); // 初始化文件上传解析器
-		initLocaleResolver(context); // 初始化LocaleResolver
-		initThemeResolver(context); //初始化ThemeResolver
-		initHandlerMappings(context);
-		initHandlerAdapters(context);
-		initHandlerExceptionResolvers(context);
+		initLocaleResolver(context); // 初始化LocaleResolver(AcceptHeaderLocaleResolver)
+		initThemeResolver(context); //初始化ThemeResolver(FixedThemeResolver)
+		initHandlerMappings(context); // 初始化BeanNameUrlHandlerMapping, RequestMappingHandlerMapping
+		initHandlerAdapters(context); // 初始化HandlerAdapter
+		initHandlerExceptionResolvers(context); // 初始化HandlerExceptionResolver
 		initRequestToViewNameTranslator(context);
-		initViewResolvers(context);
+		initViewResolvers(context); // 初始化ViewResolver
 		initFlashMapManager(context);
 	}
 
@@ -619,6 +619,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// a default HandlerMapping if no other mappings are found.
 		// 默认：BeanNameUrlHandlerMapping, RequestMappingHandlerMapping
 		if (this.handlerMappings == null) {
+			// 初始化BeanNameUrlHandlerMapping, RequestMappingHandlerMapping(初始化时扫描Controller，注册HandlerMethod)
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No HandlerMappings declared for servlet '" + getServletName() +
@@ -628,27 +629,29 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the HandlerAdapters used by this class.
+	 * Initialize the HandlerAdapters used by this class. 初始化HandlerAdapter
 	 * <p>If no HandlerAdapter beans are defined in the BeanFactory for this namespace,
 	 * we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters(ApplicationContext context) {
 		this.handlerAdapters = null;
 
+		// 是否检测出所有的HandlerAdapter Bean，还是只检测name为handlerAdapter的HandlerAdapter Bean
 		if (this.detectAllHandlerAdapters) {
+			// 找出所有的HandlerAdapter Bean，包括父BeanFactory中的定义
 			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
 			Map<String, HandlerAdapter> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerAdapters = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerAdapters);
+				AnnotationAwareOrderComparator.sort(this.handlerAdapters); // 排序
 			}
 		}
 		else {
 			try {
 				HandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
-				this.handlerAdapters = Collections.singletonList(ha);
+				this.handlerAdapters = Collections.singletonList(ha); // 一个
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, we'll add a default HandlerAdapter later.
@@ -657,6 +660,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least some HandlerAdapters, by registering
 		// default HandlerAdapters if no other adapters are found.
+		// 没有自定义的HandlerAdapter，则使用默认的：HttpRequestHandlerAdapter、SimpleControllerHandlerAdapter、
+		// RequestMappingHandlerAdapter
 		if (this.handlerAdapters == null) {
 			this.handlerAdapters = getDefaultStrategies(context, HandlerAdapter.class);
 			if (logger.isTraceEnabled()) {
@@ -667,7 +672,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the HandlerExceptionResolver used by this class.
+	 * Initialize the HandlerExceptionResolver used by this class. 初始化HandlerExceptionResolver
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to no exception resolver.
 	 */
@@ -697,6 +702,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least some HandlerExceptionResolvers, by registering
 		// default HandlerExceptionResolvers if no other resolvers are found.
+		// 默认：ExceptionHandlerExceptionResolver、ResponseStatusExceptionResolver、DefaultHandlerExceptionResolver
 		if (this.handlerExceptionResolvers == null) {
 			this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
 			if (logger.isTraceEnabled()) {
@@ -722,7 +728,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
+			// We need to use the default. 默认：DefaultRequestToViewNameTranslator
 			this.viewNameTranslator = getDefaultStrategy(context, RequestToViewNameTranslator.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No RequestToViewNameTranslator '" + REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
@@ -732,7 +738,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the ViewResolvers used by this class.
+	 * Initialize the ViewResolvers used by this class. 初始化ViewResolver
 	 * <p>If no ViewResolver beans are defined in the BeanFactory for this
 	 * namespace, we default to InternalResourceViewResolver.
 	 */
@@ -760,7 +766,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Ensure we have at least one ViewResolver, by registering
-		// a default ViewResolver if no other resolvers are found.
+		// a default ViewResolver if no other resolvers are found. 默认使用InternalResourceViewResolver
 		if (this.viewResolvers == null) {
 			this.viewResolvers = getDefaultStrategies(context, ViewResolver.class);
 			if (logger.isTraceEnabled()) {
@@ -786,7 +792,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
+			// We need to use the default. 默认SessionFlashMapManager
 			this.flashMapManager = getDefaultStrategy(context, FlashMapManager.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No FlashMapManager '" + FLASH_MAP_MANAGER_BEAN_NAME +

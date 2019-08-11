@@ -559,7 +559,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBody advice beans
-		initControllerAdviceCache();
+		initControllerAdviceCache(); // 初始化ControllerAdvice缓存
 
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -575,13 +575,15 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 	}
 
+	// 初始化ControllerAdvice缓存
 	private void initControllerAdviceCache() {
 		if (getApplicationContext() == null) {
 			return;
 		}
 
+		// 找出所有注解了@ControllerAdvice的Bean
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(adviceBeans);
+		AnnotationAwareOrderComparator.sort(adviceBeans); // 排序
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 

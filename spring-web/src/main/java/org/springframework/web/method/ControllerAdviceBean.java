@@ -181,6 +181,8 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	/**
+	 * 找出所有注解了@ControllerAdvice的Bean
+	 *
 	 * Find the names of beans annotated with
 	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.

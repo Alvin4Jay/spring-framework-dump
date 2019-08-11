@@ -196,10 +196,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		initHandlerMethods();
+		initHandlerMethods();  // 扫描bean，注册HandlerMethod
 	}
 
 	/**
+	 * 扫描bean，注册HandlerMethod
 	 * Scan beans in the ApplicationContext, detect and register handler methods.
 	 * @see #getCandidateBeanNames()
 	 * @see #processCandidateBean
@@ -211,7 +212,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				processCandidateBean(beanName);
 			}
 		}
-		handlerMethodsInitialized(getHandlerMethods());
+		handlerMethodsInitialized(getHandlerMethods()); // 日志打印
 	}
 
 	/**
@@ -250,7 +251,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 		if (beanType != null && isHandler(beanType)) { // 类上标注@Controller或@RequestMapping注解，即为Handler
-			detectHandlerMethods(beanName);
+			detectHandlerMethods(beanName); // 检测HandlerMathod并注册
 		}
 	}
 
@@ -276,21 +277,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						}
 					});
 			if (logger.isTraceEnabled()) {
-				logger.trace(formatMappings(userType, methods));
+				logger.trace(formatMappings(userType, methods)); // 格式化输出RequestMappingInfo
 			}
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
-				registerHandlerMethod(handler, invocableMethod, mapping);
+				registerHandlerMethod(handler, invocableMethod, mapping); // 注册HandlerMethod
 			});
 		}
 	}
 
+	// 格式化RequestMappingInfo
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-		// 类名缩写
+		// 类名缩写 x.y.z.DemoController
 		String formattedType = Arrays.stream(userType.getPackage().getName().split("\\."))
 				.map(p -> p.substring(0, 1))
 				.collect(Collectors.joining(".", "", ".")) + userType.getSimpleName();
 
+		// 方法类型 (String, User, Integer)
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
@@ -304,11 +307,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
+	 * 注册HandlerMethod。
+	 *
 	 * Register a handler method and its unique mapping. Invoked at startup for
 	 * each detected handler method.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
-	 * @param mapping the mapping conditions associated with the handler method
+	 * @param mapping the mapping conditions associated with the handler method // 注：RequestMappingInfo
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
@@ -583,14 +588,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.readLock().unlock();
 		}
 
+		/**
+		 * 注册HandlerMethod
+		 * @param mapping RequestMappingInfo
+		 * @param handler handler beanName(String)
+		 * @param method 处理器方法
+		 */
 		public void register(T mapping, Object handler, Method method) {
 			this.readWriteLock.writeLock().lock();
 			try {
-				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
-				assertUniqueMethodMapping(handlerMethod, mapping);
-				this.mappingLookup.put(mapping, handlerMethod);
+				HandlerMethod handlerMethod = createHandlerMethod(handler, method); // 创建HandlerMethod
+				assertUniqueMethodMapping(handlerMethod, mapping); // 确定映射的唯一性
+				this.mappingLookup.put(mapping, handlerMethod); // 保存
 
-				List<String> directUrls = getDirectUrls(mapping);
+				List<String> directUrls = getDirectUrls(mapping); // 从RequestMappingInfo获取不需要match的url
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
 				}
