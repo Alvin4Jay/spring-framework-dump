@@ -466,11 +466,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	protected View createView(String viewName, Locale locale) throws Exception {
 		// If this resolver is not supposed to handle the given view,
 		// return null to pass on to the next resolver in the chain.
-		if (!canHandle(viewName, locale)) {
+		if (!canHandle(viewName, locale)) { // 检查当前视图解析器是否能处理该视图
 			return null;
 		}
 
-		// Check for special "redirect:" prefix.
+		// Check for special "redirect:" prefix. 重定向处理
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
 			RedirectView view = new RedirectView(redirectUrl,
@@ -479,10 +479,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 			if (hosts != null) {
 				view.setHosts(hosts);
 			}
-			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view);
+			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view); // 返回重定向视图
 		}
 
-		// Check for special "forward:" prefix.
+		// Check for special "forward:" prefix. forward处理
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
 			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
 			InternalResourceView view = new InternalResourceView(forwardUrl);
@@ -490,7 +490,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		}
 
 		// Else fall back to superclass implementation: calling loadView.
-		return super.createView(viewName, locale);
+		return super.createView(viewName, locale); // 返回InternalResourecView
 	}
 
 	/**
@@ -545,7 +545,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		Class<?> viewClass = getViewClass();
+		Class<?> viewClass = getViewClass(); // InternalResourceView
 		Assert.state(viewClass != null, "No view class");
 
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);

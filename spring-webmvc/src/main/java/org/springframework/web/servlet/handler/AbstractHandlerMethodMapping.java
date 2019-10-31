@@ -228,7 +228,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * 确定bean的类型，判断是否是Handler，检测HandlerMathod
+	 * 确定bean的类型，判断是否是Handler，检测HandlerMethod
 	 * Determine the type of the specified candidate bean and call
 	 * {@link #detectHandlerMethods} if identified as a handler type.
 	 * <p>This implementation avoids bean creation through checking
@@ -368,10 +368,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request); // 请求uri
 		this.mappingRegistry.acquireReadLock();
 		try {
-			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request); // 根绝请求查找HandlerMethod
 			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 		}
 		finally {
@@ -391,7 +391,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
-		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath); // 直接根据url匹配
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
 		}
@@ -402,7 +402,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
-			matches.sort(comparator);
+			matches.sort(comparator); // 排序Match，即RequestMappingInfo
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				if (logger.isTraceEnabled()) {
@@ -420,18 +420,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							"Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
 				}
 			}
-			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
+			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod); // 将最佳匹配的HandlerMethod存入请求
 			handleMatch(bestMatch.mapping, lookupPath, request);
 			return bestMatch.handlerMethod;
 		}
 		else {
-			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request);
+			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request); // 不匹配处理
 		}
 	}
 
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
-		for (T mapping : mappings) {
-			T match = getMatchingMapping(mapping, request);
+		for (T mapping : mappings) { // RequestMappingInfo
+			T match = getMatchingMapping(mapping, request); // 存在匹配过程
 			if (match != null) {
 				matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
 			}

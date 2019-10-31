@@ -600,7 +600,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
 			}
-			if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
+			if (RequestBodyAdvice.class.isAssignableFrom(beanType)) { // 检查beanType是否实现了RequestBodyAdvice和ResponseBodyAdvice接口
 				requestResponseBodyAdviceBeans.add(adviceBean);
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
@@ -781,7 +781,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ModelAndView mav;
-		checkRequest(request);
+		checkRequest(request); // 检查请求方法是否支持、session检查
 
 		// Execute invokeHandlerMethod in synchronized block if required.
 		if (this.synchronizeOnSession) {
@@ -799,11 +799,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		else {
 			// No synchronization on session demanded at all...
-			mav = invokeHandlerMethod(request, response, handlerMethod);
+			mav = invokeHandlerMethod(request, response, handlerMethod); // 执行HandlerMethod逻辑
 		}
 
 		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
-			if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
+			if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) { // false
 				applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
 			}
 			else {
@@ -856,9 +856,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		try {
-			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
-			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
-
+			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod); // ServletRequestDataBinderFactory
+			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory); // ModelFactory
+			// ServletInvocableHandlerMethod
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
 			if (this.argumentResolvers != null) {
 				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -894,12 +894,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
-			invocableMethod.invokeAndHandle(webRequest, mavContainer);
+			invocableMethod.invokeAndHandle(webRequest, mavContainer); // 调用HandlerMethod，并返回响应，设置是否需要视图解析
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
 			}
 
-			return getModelAndView(mavContainer, modelFactory, webRequest);
+			return getModelAndView(mavContainer, modelFactory, webRequest); // 获取ModelAndView
 		}
 		finally {
 			webRequest.requestCompleted();
@@ -972,7 +972,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Object bean = handlerMethod.getBean();
 			initBinderMethods.add(createInitBinderMethod(bean, method));
 		}
-		return createDataBinderFactory(initBinderMethods);
+		return createDataBinderFactory(initBinderMethods); // ServletRequestDataBinderFactory
 	}
 
 	private InvocableHandlerMethod createInitBinderMethod(Object bean, Method method) {
@@ -1005,7 +1005,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		modelFactory.updateModel(webRequest, mavContainer);
 		if (mavContainer.isRequestHandled()) {
-			return null;
+			return null; // 若请求已由HandlerMethod处理完毕，则指接返回
 		}
 		ModelMap model = mavContainer.getModel();
 		ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());

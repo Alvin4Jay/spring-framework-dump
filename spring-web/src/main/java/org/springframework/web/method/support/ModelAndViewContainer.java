@@ -257,7 +257,7 @@ public class ModelAndViewContainer {
 	 * <p>The default value is {@code false}.
 	 */
 	public void setRequestHandled(boolean requestHandled) {
-		this.requestHandled = requestHandled;
+		this.requestHandled = requestHandled; // 标记是否需要视图解析，true表示不需要
 	}
 
 	/**

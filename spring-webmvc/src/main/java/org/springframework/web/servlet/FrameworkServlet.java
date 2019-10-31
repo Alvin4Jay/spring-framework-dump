@@ -1004,18 +1004,20 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		Throwable failureCause = null;
 
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContext localeContext = buildLocaleContext(request);
+		LocaleContext localeContext = buildLocaleContext(request); // 构建LocaleContext
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
+		// 构建请求属性
 		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
+		// 将LocaleContext和RequestAttributes绑定到线程
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
-			doService(request, response);
+			doService(request, response); // DispatcherServlet实现
 		}
 		catch (ServletException | IOException ex) {
 			failureCause = ex;
@@ -1027,12 +1029,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		finally {
+			// 重置线程的LocaleContext和RequestAttributes
 			resetContextHolders(request, previousLocaleContext, previousAttributes);
 			if (requestAttributes != null) {
 				requestAttributes.requestCompleted();
 			}
 			logResult(request, response, failureCause, asyncManager);
-			publishRequestHandledEvent(request, response, startTime, failureCause);
+			publishRequestHandledEvent(request, response, startTime, failureCause); // 发布事件
 		}
 	}
 
@@ -1150,7 +1153,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (this.publishEvents && this.webApplicationContext != null) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
-			this.webApplicationContext.publishEvent(
+			this.webApplicationContext.publishEvent( // 发布事件
 					new ServletRequestHandledEvent(this,
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),

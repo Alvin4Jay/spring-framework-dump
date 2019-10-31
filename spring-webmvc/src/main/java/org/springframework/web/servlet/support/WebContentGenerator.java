@@ -374,7 +374,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @since 4.2
 	 */
 	protected final void checkRequest(HttpServletRequest request) throws ServletException {
-		// Check whether we should support the request method.
+		// Check whether we should support the request method. 查看是否支持该请求方法
 		String method = request.getMethod();
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method, this.supportedMethods);
@@ -397,7 +397,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			applyCacheControl(response, this.cacheControl);
 		}
 		else {
-			applyCacheSeconds(response, this.cacheSeconds);
+			applyCacheSeconds(response, this.cacheSeconds); // 这里
 		}
 		if (this.varyByRequestHeaders != null) {
 			for (String value : getVaryRequestHeadersToAdd(response, this.varyByRequestHeaders)) {

@@ -99,12 +99,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
-		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs); // 调用HandlerMethod
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
 			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
-				mavContainer.setRequestHandled(true);
+				mavContainer.setRequestHandled(true); // 请求已处理，不需要视图解析
 				return;
 			}
 		}
@@ -116,7 +116,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		mavContainer.setRequestHandled(false);
 		Assert.state(this.returnValueHandlers != null, "No return value handlers");
 		try {
-			this.returnValueHandlers.handleReturnValue(
+			this.returnValueHandlers.handleReturnValue( // 处理返回值
 					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
 		catch (Exception ex) {

@@ -135,7 +135,7 @@ public class HandlerExecutionChain {
 				HandlerInterceptor interceptor = interceptors[i];
 				if (!interceptor.preHandle(request, response, this.handler)) {
 					triggerAfterCompletion(request, response, null);
-					return false;
+					return false; // 剩余的HandlerInterceptor和handler不执行
 				}
 				this.interceptorIndex = i;
 			}
@@ -151,7 +151,7 @@ public class HandlerExecutionChain {
 
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = interceptors.length - 1; i >= 0; i--) {
+			for (int i = interceptors.length - 1; i >= 0; i--) { // 反序执行afterCompletion方法
 				HandlerInterceptor interceptor = interceptors[i];
 				interceptor.postHandle(request, response, this.handler, mv);
 			}
@@ -168,7 +168,7 @@ public class HandlerExecutionChain {
 
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = this.interceptorIndex; i >= 0; i--) {
+			for (int i = this.interceptorIndex; i >= 0; i--) { // 反序执行afterCompletion方法
 				HandlerInterceptor interceptor = interceptors[i];
 				try {
 					interceptor.afterCompletion(request, response, this.handler, ex);

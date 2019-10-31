@@ -159,7 +159,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Including [" + getUrl() + "]");
 			}
-			rd.include(request, response);
+			rd.include(request, response); // include
 		}
 
 		else {
@@ -167,7 +167,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarding to [" + getUrl() + "]");
 			}
-			rd.forward(request, response);
+			rd.forward(request, response); // forward
 		}
 	}
 

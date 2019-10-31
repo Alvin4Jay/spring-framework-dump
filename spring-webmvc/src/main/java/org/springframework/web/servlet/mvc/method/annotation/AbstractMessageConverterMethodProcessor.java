@@ -182,9 +182,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
-		Object body;
-		Class<?> valueType;
-		Type targetType;
+		Object body; // 响应内容
+		Class<?> valueType; // 返回值类型
+		Type targetType; //
 
 		if (value instanceof CharSequence) {
 			body = value.toString();
@@ -197,7 +197,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			targetType = GenericTypeResolver.resolveType(getGenericType(returnType), returnType.getContainingClass());
 		}
 
-		if (isResourceType(value, returnType)) {
+		if (isResourceType(value, returnType)) { // 是否是资源类型
 			outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null &&
 					outputMessage.getServletResponse().getStatus() == 200) {
@@ -216,7 +216,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-		MediaType selectedMediaType = null;
+		MediaType selectedMediaType = null; // 获取MediaType
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
 			if (logger.isDebugEnabled()) {
@@ -272,12 +272,13 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
-			for (HttpMessageConverter<?> converter : this.messageConverters) {
+			for (HttpMessageConverter<?> converter : this.messageConverters) { // 遍历消息转换器
 				GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ?
 						(GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
 						converter.canWrite(valueType, selectedMediaType)) {
+					// getAdvice(): RequestResponseBodyAdviceChain
 					body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
@@ -290,6 +291,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 							genericConverter.write(body, targetType, selectedMediaType, outputMessage);
 						}
 						else {
+							// 写出数据
 							((HttpMessageConverter) converter).write(body, selectedMediaType, outputMessage);
 						}
 					}

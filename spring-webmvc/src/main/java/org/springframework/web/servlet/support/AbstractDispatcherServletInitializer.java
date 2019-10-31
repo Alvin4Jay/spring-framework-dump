@@ -85,20 +85,21 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
+		// 注册DispatcherServlet到ServletContext
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		if (registration == null) {
 			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
 					"Check if there is another servlet registered under the same name.");
 		}
 
-		registration.setLoadOnStartup(1);
+		registration.setLoadOnStartup(1); // 容器启动时初始化
 		registration.addMapping(getServletMappings());
 		registration.setAsyncSupported(isAsyncSupported());
 
 		Filter[] filters = getServletFilters();
 		if (!ObjectUtils.isEmpty(filters)) {
 			for (Filter filter : filters) {
-				registerServletFilter(servletContext, filter);
+				registerServletFilter(servletContext, filter); // 注册Filter
 			}
 		}
 

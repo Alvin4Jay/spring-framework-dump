@@ -94,7 +94,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Provide a Comparator to sort RequestMappingInfos matched to a request.
+	 * Provide a Comparator to sort RequestMappingInfos matched to a request. 对于匹配的RequestMappingInfos进行排序
 	 */
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
@@ -102,6 +102,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
+	 * 将一些属性暴露到请求中
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
@@ -121,22 +122,23 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		else {
 			bestPattern = patterns.iterator().next();
+			// 将uri路径中的变量提取出来 /aa/{name}, /aa/jay --> name -> jay
 			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 		}
 
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 
-		if (isMatrixVariableContentAvailable()) {
+		if (isMatrixVariableContentAvailable()) { // false
 			Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(request, uriVariables);
 			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
 		}
 
 		Map<String, String> decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables); // 保存到请求中
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
-			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes); // 生产的内容类型
 		}
 	}
 
@@ -186,7 +188,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
-		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
+		PartialMatchHelper helper = new PartialMatchHelper(infos, request); // 检查部分匹配的mapping
 		if (helper.isEmpty()) {
 			return null;
 		}
@@ -197,7 +199,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
-			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
+			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods); // URI匹配，请求方法不匹配
 		}
 
 		if (helper.hasConsumesMismatch()) {
@@ -211,12 +213,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 				}
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes));
+			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes)); // 消费类型不满足
 		}
 
 		if (helper.hasProducesMismatch()) {
 			Set<MediaType> mediaTypes = helper.getProducibleMediaTypes();
-			throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(mediaTypes));
+			throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(mediaTypes)); // 生产类型不满足
 		}
 
 		if (helper.hasParamsMismatch()) {
@@ -237,8 +239,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
 			for (RequestMappingInfo info : infos) {
-				if (info.getPatternsCondition().getMatchingCondition(request) != null) {
-					this.partialMatches.add(new PartialMatch(info, request));
+				if (info.getPatternsCondition().getMatchingCondition(request) != null) { // URI匹配
+					this.partialMatches.add(new PartialMatch(info, request)); // 部分匹配
 				}
 			}
 		}
@@ -255,7 +257,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 */
 		public boolean hasMethodsMismatch() {
 			for (PartialMatch match : this.partialMatches) {
-				if (match.hasMethodsMatch()) {
+				if (match.hasMethodsMatch()) { // 看请求方法是否匹配
 					return false;
 				}
 			}

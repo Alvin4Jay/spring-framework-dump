@@ -123,6 +123,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 					"Unsupported parameter type [" + parameter.getParameterType().getName() + "]." +
 							" supportsParameter should be called first.");
 		}
+		// resolver：equestResponseBodyMethodProcessor
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 

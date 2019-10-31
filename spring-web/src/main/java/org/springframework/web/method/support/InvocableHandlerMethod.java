@@ -135,7 +135,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		return doInvoke(args);
+		return doInvoke(args); // 调用HandlerMethod
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
-			return getBridgedMethod().invoke(getBean(), args);
+			return getBridgedMethod().invoke(getBean(), args); // 调用HandlerMethod
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);

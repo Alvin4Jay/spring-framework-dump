@@ -801,7 +801,7 @@ class ConfigurationClassParser {
 			try {
 				if (deferredImports != null) {
 					DeferredImportSelectorGroupingHandler handler = new DeferredImportSelectorGroupingHandler();
-					deferredImports.sort(DEFERRED_IMPORT_COMPARATOR);
+					deferredImports.sort(DEFERRED_IMPORT_COMPARATOR); // 排序DeferredImportSelectorHolder
 					deferredImports.forEach(handler::register);
 					handler.processGroupImports();
 				}

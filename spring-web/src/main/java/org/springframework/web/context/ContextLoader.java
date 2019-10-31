@@ -296,11 +296,16 @@ public class ContextLoader {
 			// ROOT Web应用上下文引用保存到ServletContext
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
+			// 获取线程上下文类加载器，默认为WebAppClassLoader
 			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+			// 如果spring的jar包放在每个webapp自己的目录中
+			// 此时线程上下文类加载器会与本类的类加载器（加载spring的）相同，都是WebAppClassLoader
 			if (ccl == ContextLoader.class.getClassLoader()) {
 				currentContext = this.context;
 			}
 			else if (ccl != null) {
+				// 如果不同，那么用一个map把刚才创建的WebApplicationContext及对应的WebAppClassLoader存下来
+				// 一个webapp对应一个记录，后续调用时直接根据WebAppClassLoader来取出
 				currentContextPerThread.put(ccl, this.context);
 			}
 

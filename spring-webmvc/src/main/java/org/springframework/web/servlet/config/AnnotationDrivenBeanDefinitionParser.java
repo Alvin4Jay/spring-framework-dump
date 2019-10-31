@@ -569,6 +569,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
+		// 添加默认的HttpMessageConverters
 		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
 			messageConverters.setSource(source);
 			messageConverters.add(createConverterDefinition(ByteArrayHttpMessageConverter.class, source));

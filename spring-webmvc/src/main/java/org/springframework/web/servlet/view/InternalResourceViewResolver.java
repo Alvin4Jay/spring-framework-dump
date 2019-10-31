@@ -61,7 +61,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * is present.
 	 */
 	public InternalResourceViewResolver() {
-		Class<?> viewClass = requiredViewClass();
+		Class<?> viewClass = requiredViewClass(); // 解析视图类
 		if (InternalResourceView.class == viewClass && jstlPresent) {
 			viewClass = JstlView.class;
 		}
