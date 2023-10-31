@@ -68,9 +68,9 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 			if (mode != null && proxyTargetClass != null && AdviceMode.class == mode.getClass() &&
 					Boolean.class == proxyTargetClass.getClass()) {
 				candidateFound = true;
-				if (mode == AdviceMode.PROXY) {
+				if (mode == AdviceMode.PROXY) { // JDK代理模式
 					AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
-					if ((Boolean) proxyTargetClass) {
+					if ((Boolean) proxyTargetClass) { // 类代理
 						AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 						return;
 					}

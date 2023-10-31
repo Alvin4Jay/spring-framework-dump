@@ -592,11 +592,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
 			}
 		}
-		// TODO 待看 循环引用 ??
 		if (earlySingletonExposure) {
 			Object earlySingletonReference = getSingleton(beanName, false);
 			if (earlySingletonReference != null) {
-				if (exposedObject == bean) {
+				if (exposedObject == bean) { // 这里将循环依赖重创建的代理返回，而不是原始的bean
 					exposedObject = earlySingletonReference;
 				}
 				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
@@ -936,6 +935,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					// 如果需要代理，这里会返回代理对象[AbstractAutoProxyCreator]；否则返回原始对象
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 				}
 			}

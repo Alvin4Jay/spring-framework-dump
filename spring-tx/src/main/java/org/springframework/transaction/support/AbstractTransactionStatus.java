@@ -171,7 +171,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 			throw new TransactionUsageException(
 					"Cannot release savepoint - no savepoint associated with current transaction");
 		}
-		getSavepointManager().releaseSavepoint(savepoint);
+		getSavepointManager().releaseSavepoint(savepoint); // 释放保存点
 		setSavepoint(null);
 	}
 

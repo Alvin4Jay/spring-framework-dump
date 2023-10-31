@@ -393,11 +393,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 
-		// Process any early evictions
+		// Process any early evictions @CacheEvict注解的方法调用前清除缓存
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true,
 				CacheOperationExpressionEvaluator.NO_RESULT);
 
-		// Check if we have a cached item matching the conditions
+		// Check if we have a cached item matching the conditions @Cacheable注解
+		// 当注解为@Cacheable时，查询cacheHit，不为空表示有缓存存在。如果为空，需要放入cache待写的list中cachePutRequests
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
 		// Collect puts from any @Cacheable miss, if no cached item is found
@@ -410,26 +411,26 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		Object cacheValue;
 		Object returnValue;
 
-		if (cacheHit != null && !hasCachePut(contexts)) {
+		if (cacheHit != null && !hasCachePut(contexts)) { // 无CachePut操作
 			// If there are no put requests, just use the cache hit
 			cacheValue = cacheHit.get();
 			returnValue = wrapCacheValue(method, cacheValue);
 		}
 		else {
 			// Invoke the method if we don't have a cache hit
-			returnValue = invokeOperation(invoker);
+			returnValue = invokeOperation(invoker); // 执行目标方法
 			cacheValue = unwrapReturnValue(returnValue);
 		}
 
-		// Collect any explicit @CachePuts
+		// Collect any explicit @CachePuts 如果为@CachePut操作，那么也需要放入cache待写的list中（即：cachePutRequests）。
 		collectPutRequests(contexts.get(CachePutOperation.class), cacheValue, cachePutRequests);
 
 		// Process any collected put requests, either from @CachePut or a @Cacheable miss
-		for (CachePutRequest cachePutRequest : cachePutRequests) {
+		for (CachePutRequest cachePutRequest : cachePutRequests) { // 写缓存
 			cachePutRequest.apply(cacheValue);
 		}
 
-		// Process any late evictions
+		// Process any late evictions 对@CacheEvict注解进行清理cache操作
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), false, cacheValue);
 
 		return returnValue;
@@ -483,7 +484,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		Object key = null;
 		for (Cache cache : context.getCaches()) {
-			if (operation.isCacheWide()) {
+			if (operation.isCacheWide()) { // allEntries属性
 				logInvalidating(context, operation, null);
 				doClear(cache);
 			}

@@ -130,26 +130,28 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
+		// 内部封装好的事务管理器
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
+		// 需要手动获取事务，执行方法，提交事务的管理器
 		else {
-			TransactionStatus status = this.transactionManager.getTransaction(this);
+			TransactionStatus status = this.transactionManager.getTransaction(this); // 1.获取事务状态
 			T result;
 			try {
-				result = action.doInTransaction(status);
+				result = action.doInTransaction(status); // 2.执行业务逻辑
 			}
 			catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
-				rollbackOnException(status, ex);
+				rollbackOnException(status, ex); // 应用运行时异常、Error异常 -> 回滚
 				throw ex;
 			}
 			catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
-				rollbackOnException(status, ex);
+				rollbackOnException(status, ex); // 未知异常 -> 回滚
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
-			this.transactionManager.commit(status);
+			this.transactionManager.commit(status); // 3.事务提交
 			return result;
 		}
 	}
